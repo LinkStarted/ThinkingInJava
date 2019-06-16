@@ -1291,7 +1291,101 @@ public class Wind extends Instrument{
 
 ### 7.8.1 final数据
 
+- 一个既是static又是final的域只占据一段不能改变的存储空间。
+- 对于基本类型，final使数值恒定不变；而用于对象引用，final使引用恒定不变。一旦引用被初始化指向一个对象，就无法再把它改为指向另一个对象。然而，对象其自身却是可以被修改的，Java并未提供使任何对象恒定不变的途径。
+- 带有恒定初始值（即，编译期常量）的final static基本类型全用大写字母命名，并且字与字之间用下划线隔开
 
+**空白final** 
+
+- Java允许生成“空白final”，所谓空白final是指被声明为final但又未给定初值的域。
+- 无论什么情况，编译器都确保空白final在使用前必须被初始化。
+- 必须在域的定义处或者每个构造器中用表达式对final进行赋值，这正是final域在使用前总是被初始化的原因所在。
+  
+```java
+class Poppet{
+    private int i;
+    Poppet(int ii){ i = ii; }
+}
+
+public class BlankFinal{
+    private final int i = 0;
+    private final int j;
+    private fianl Poppet p;
+    public BlankFinal(){
+        j = 1;
+        p = new Poppet(1);
+    }
+    public BlankFinal(int x){
+        j = x;
+        p = new Poppet(x)
+    }
+    public static void main(String[] args){
+        new BlankFinal();
+        new BlankFinal(47);
+    }
+}
+```
+
+**final参数**
+
+- Java允许在参数列表中以声明的方式将参数指明为final。这意味着你无法在方法中更改参数引用所指向的对象；
+
+```java
+class Gizmo{
+    public void spin(){}
+}
+
+public class FinalArguments{
+    void with(fianl Gizmo g){
+        // g = new Gizmo(); // Illegal -- g is final
+    }
+    void without(Gizmo g){
+        g = new Gizmo();
+        g.spin();
+    }
+    // void f(final int i){ i++; }  // Cann't change
+    // You can only read from a final primitive
+    int g(final int i){ return i + 1; }
+    public static void main(String[] args){
+        FinalArguments bf = new FinalArguments();
+        bf.without(null);
+        bf.with(null);
+    }
+}
+```
+
+- 方法f()和g()展示了当基本类型的参数被指明为final时所出现的结果：你可以读参数，但却无法修改参数。这一特性主要用来向匿名内部类传递数据
+
+### 7.8.2 final方法
+
+- 使用final方法的原因有两个：
+  - 第一个原因是把方法锁定，以防任何继承类修改它的含义。想要确保在继承中使方法行为保持不变，并且不会被覆盖。
+  - 第二个原因是效率。在使用Java SE5/6时，应该让编译器和JVM去处理效率问题，**只有在想要明确禁止覆盖时，才将方法设置为final的**。
+  
+**final和private关键字**
+
+- 类中所有的private方法都隐式地指定为是final的。
+- 由于无法取用private方法， 所以也就无法覆盖它。可以对private方法添加final修饰词，但这并不能给该方法增加任何额外的意义。
+- “覆盖”(重写，Override)只有在某方法是基类的接口的一部分时才会出现。即，必须能将一个对象向上转型为它的基本类型并调用相同的方法。
+- 如果某方法为private ，它就不是基类的接口的一部分。它仅是一些隐藏于类中的程序代码，只不过是具有相同的名称而已。
+
+### 7.8.3 final类
+
+- 当将某个类的整体定义为final时（通过将关键字final置于它的定义之前)，就表明了你不打算继承该类，而且也不允许别人这样做。换句话说，出于某种考虑，你对该类的设计永不需要做任何变动，或者出于安全的考虑，你不希望它有子类。
+- 由于final类禁止继承，所以finai类中所有的方法都隐式指定为是final的，因为无法覆盖它们。在final类中可以给方法添加final修饰词，但这不会增添任何意义。
 
 ## 7.9 初始化及类的加载
 
+- Java类加载顺序：父类静态属性（成员变量） > 父类静态代码块 > 子类静态属性 > 子类静态代码块 > 父类非静态属性 > 父类非静态代码块 > 父类构造器 > 子类非静态属性 > 子类非静态代码块 > 子类构造器。[参考](https://yq.aliyun.com/articles/653204?utm_content=m_1000018740)
+
+# 第八章 多态
+
+## 8.1 再论向上转型
+
+## 8.2 转机
+
+## 8.3 构造器和多态
+
+## 8.4 协变返回类型
+
+## 8.5 用继承进行设计

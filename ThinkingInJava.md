@@ -1125,19 +1125,173 @@ public class Lunch{
 
 ## 7.1 组合语法
 
+- 所谓的组合就是创建一个新类去调用已经创建并且调试好的类，那么这个新类就可以把它叫做是一个组合
+- 类中域为基本类型时能够自动被初始化。但是对象引用会被初始化为null，而且如果你试图为它们调用任何方法，都会得到一个异常一一运行时错误。很方便的是，在不抛出异常的情况下仍旧可以打印一个null引用。
+- 如果想初始化引用，可以在代码中的下列位置进行:
+  - 在定义对象的地方。这意味着它们总是能够在构造器被调用之前被初始化。
+  - 在类的构造器中。
+  - 就在正要使用这些对象之前，这种方式称为惰性初始化。在生成对象不值得及不必每次都生成对象的情况下，这种方式可以减少额外的负担。
+  - 使用实例初始化。
+
+以下是这四种方式的示例:
+
+```java
+class Soap{
+    private String s;
+    Soap(){
+        print("Soap()");
+        s = "Constructed";
+    }
+    public String toString(){
+        return s;
+    }
+}
+
+public class Bath{
+    private String 
+        s1 = "Happy",
+        s2 = "Happy",
+        s3,s4;
+    private Soap castille;
+    private int i;
+    private float toy;
+    public Bath(){
+        print("Inside Bath()");
+        s3 = "Joy";
+        toy = 3.14f;
+        castille = new Soap();
+    }
+    {i = 47;}
+    public String toString(){
+        if(s4 == null){
+            s4 = "Joy";//Delayed initializtion
+        }
+        return 
+            "s1 = " + s1 + "\n" +
+            "s2 = " + s2 + "\n" +
+            "s3 = " + s3 + "\n" +
+            "s4 = " + s4 + "\n" +
+            "i = " + i + "\n" +
+            "toy = " + toy + "\n" +
+            "castille = " + castille;
+    }
+    public static void main(String[] args){
+        Bath b = new Bath();
+        print(b);
+    }
+}
+
+//Output
+Inside Bath()
+Soap()
+s1 = Happy
+s2 = Happy
+s3 = Joy
+s4 = Joy
+i = 47
+toy = 3.14
+castille = Constructed
+```
+
 ## 7.2 继承语法
+
+- 当创建一个类时，总是在继承，因此，除非已明确指出要从其他类中继承，否则就是在隐式地从Java的标准根类Object进行继承。
+- 通过在类主体的左边花括号之前，书写后面紧随基类名称的关键字`extends`而实现的。当这么做时，会自动得到基类中所有的域和方法。
+
+### 7.2.1 初始化基类
+
+- 对基类子对象的正确初始化也是至关重要的，而且也仅有一种方法来保证这一点: **在构造器中调用基类构造器来执行初始化**，而基类构造器具有执行基类初始化所需要的所有知识和能力。Java会自动在导出类的构造器中插入对基类构造器的调用。
+
+**带参数构造器**
+如果没有默认的基类构造器，或者想调用一个带参数的基类构造器，就必须用关键字super显式地编写调用基类构造器的语句，并且配以适当的参数列表:
+
+```java
+class Game{
+    Game(int i){
+        print("Game constructor");
+    }
+}
+
+class BoardGame extends Game{
+    BoardGame(int i){
+        super(i);
+        print("BoardGame constructor");
+    }
+}
+
+public class Chess extends BoardGame{
+    Chess(){
+        super(11);
+        print("Chess constructor");
+    }
+    public static void main(String[] args){
+        Chess x = new Chess();
+    }
+}
+
+//Output
+Game constructor
+BoardGame constructor
+Chess constructor
+```
 
 ## 7.3 代理
 
 ## 7.4 结合使用组合和继承
 
+### 7.4.1 确保正确清理
+
+- 你并不知道垃圾回收器何时将会被调用，或者它是否将被调用。因此，如果你想要某个类清理一些东西，就必须显式地编写一个特殊方法来做这件事，并要确保客户端程序员知晓他们必须要调用这一方法。其首要任务就是，必须将这一清理动作置于finally子句之中，以预防异常的出现。
+
+### 7.4.2 名称屏蔽
+
+- 如果Java的基类拥有某个已被多次重载的方法名称，那么在导出类中重新定义该方法名称并不会屏蔽其在基类中的任何版本(这一点与C++不同)。因此，无论是在该层或者它的基类中对方法进行定义，重载机制都可以正常工作:
+
 ## 7.5 在组合与继承之间选择
+
+- 组合和继承都允许在新的类中放置子对象，组合是显式地这样做，而继承则是隐式地做。
+- 组合技术通常用于想在新类中使用现有类的功能而非它的接口这种情形。
+- 在继承的时候，使用某个现有类，并开发一个它的特殊版本。通常，这意味着你在使用一个通用类，并为了某种特殊需要而将其特殊化。
+- “is-a"(是一个)的关系是用继承来表达的，而“has-a"(有一个)的关系则是用组合来表达的。
 
 ## 7.6 protected关键字
 
+- 在同一包，同一类和子类中可以访问。
+
 ## 7.7 向上转型
 
+```java
+class Instrument{
+    public void play(){}
+    static void tune(Instrument i){
+        i.play();
+    }
+}
+
+public class Wind extends Instrument{
+    public static void main(Stirng[] args){
+        Wind flute = new Wind();
+        Instrument.tune(flute); //upcasting
+    }
+}
+```
+
+### 7.7.1 为什么称为向上转型
+
+- 该术语的使用有其历史原因，并且是以传统的类继承图的绘制方法为基础的:将根置于页面的顶端，然后逐渐向下。
+- 由于向上转型是从一个较专用类型向较通用类型转换，所以总是安全的。
+
+### 7.7.2 再论组合和继承
+
+- 到底是该用组合还是用继承，一个最清晰的判断办法就是问一问自己**是否需要从新类向基类进行向上转型**。如果必须向上转型，则继承是必要的，但如果不需要，则应当好好考虑自己是否需要继承。
+
 ## 7.8 final关键字
+
+- final的三种情况: 数据、方法和类。
+
+### 7.8.1 final数据
+
+
 
 ## 7.9 初始化及类的加载
 

@@ -1063,7 +1063,7 @@ A@1a46e30 A@3e25a5 A@19821f
 ### 6.2.3 private：你无法访问
 
 - 关键字private的意思是，除了包含该成员的类之外，其他任何类都无法访问这个成员。
-- private终有其用武之地的示例：可能想控制如何创建对象，并阻止别人直接访问某个特定的构造器（或全部构造器）
+- private终有其用武之地的示例：可能想控制如何创建对象，并阻止别人直接访问某个特定的构造器(或全部构造器)
 
 ### 6.2.4 protected: 继承访问权限
 
@@ -1078,10 +1078,10 @@ A@1a46e30 A@3e25a5 A@19821f
 
 ## 6.4 类的访问权限
 
-- 每个编译单元（文件）都只能有一个public类。这表示，每个编译单元都有单一的公共接口，用public类来表现。
+- 每个编译单元(文件)都只能有一个public类。这表示，每个编译单元都有单一的公共接口，用public类来表现。
 - public类的名称必须完全与含有该编译单元的文件名相匹配，包括大小写。
 - 虽然不是很常用，但编译单元内完全不带public类也是可能的。在这种情况下，可以随意对文件命名。
-- 类既不可以是private的（这样会使得除该类之外，其他任何类都不可以访问它），也不可以是protected的。
+- 类既不可以是private的(这样会使得除该类之外，其他任何类都不可以访问它)，也不可以是protected的。
 - 对于**类的访问权限**，仅有两个选择：包访问权限或public。如果不希望其他任何人对该类拥有访问权限，可以把所有的构造器都指定为private，从而阻止任何人创建该类的对象，但是有一个例外，就是你在该类的static成员内部可以创建。
 - 一个内部类可以是private或是protect的
 
@@ -1118,8 +1118,8 @@ public class Lunch{
 }
 ```
 
-- Soup2用到了所谓的设计模式。这种特定的模式被称为singleton（**单例**），这是因为你始终只能创建它的一个对象。Soup2类的对象是作为Soup2的一个static private成员而创建的，所以有且仅有一个，而且除非是通过public方法access()， 否则是无法访问到它的。
-- 如果没能为类访问权限指定一个访问修饰符， 它就会默认得到包访问权限。这就意味着该类的对象可以由包内任何其他类来创建，但在包外则是不行的。（一定要记住，相同目录下的所有不具有明确package声明的文件，都被视作是该目录下默认包的一部分然而，如果该类的某个static成员是public的话，则客户端程序员仍旧可以调用该static成员，尽管他们并不能生成该类的对象。
+- Soup2用到了所谓的设计模式。这种特定的模式被称为singleton(**单例**)，这是因为你始终只能创建它的一个对象。Soup2类的对象是作为Soup2的一个static private成员而创建的，所以有且仅有一个，而且除非是通过public方法access()， 否则是无法访问到它的。
+- 如果没能为类访问权限指定一个访问修饰符， 它就会默认得到包访问权限。这就意味着该类的对象可以由包内任何其他类来创建，但在包外则是不行的。(一定要记住，相同目录下的所有不具有明确package声明的文件，都被视作是该目录下默认包的一部分然而，如果该类的某个static成员是public的话，则客户端程序员仍旧可以调用该static成员，尽管他们并不能生成该类的对象。
 
 # 第七章 复用类
 
@@ -1293,7 +1293,7 @@ public class Wind extends Instrument{
 
 - 一个既是static又是final的域只占据一段不能改变的存储空间。
 - 对于基本类型，final使数值恒定不变；而用于对象引用，final使引用恒定不变。一旦引用被初始化指向一个对象，就无法再把它改为指向另一个对象。然而，对象其自身却是可以被修改的，Java并未提供使任何对象恒定不变的途径。
-- 带有恒定初始值（即，编译期常量）的final static基本类型全用大写字母命名，并且字与字之间用下划线隔开
+- 带有恒定初始值(即，编译期常量)的final static基本类型全用大写字母命名，并且字与字之间用下划线隔开
 
 **空白final** 
 
@@ -1371,18 +1371,94 @@ public class FinalArguments{
 
 ### 7.8.3 final类
 
-- 当将某个类的整体定义为final时（通过将关键字final置于它的定义之前)，就表明了你不打算继承该类，而且也不允许别人这样做。换句话说，出于某种考虑，你对该类的设计永不需要做任何变动，或者出于安全的考虑，你不希望它有子类。
+- 当将某个类的整体定义为final时(通过将关键字final置于它的定义之前)，就表明了你不打算继承该类，而且也不允许别人这样做。换句话说，出于某种考虑，你对该类的设计永不需要做任何变动，或者出于安全的考虑，你不希望它有子类。
 - 由于final类禁止继承，所以finai类中所有的方法都隐式指定为是final的，因为无法覆盖它们。在final类中可以给方法添加final修饰词，但这不会增添任何意义。
 
 ## 7.9 初始化及类的加载
 
-- Java类加载顺序：父类静态属性（成员变量） > 父类静态代码块 > 子类静态属性 > 子类静态代码块 > 父类非静态属性 > 父类非静态代码块 > 父类构造器 > 子类非静态属性 > 子类非静态代码块 > 子类构造器。[参考](https://yq.aliyun.com/articles/653204?utm_content=m_1000018740)
+- Java类加载顺序：父类静态属性(成员变量) > 父类静态代码块 > 子类静态属性 > 子类静态代码块 > 父类非静态属性 > 父类非静态代码块 > 父类构造器 > 子类非静态属性 > 子类非静态代码块 > 子类构造器。[参考](https://yq.aliyun.com/articles/653204?utm_content=m_1000018740)
 
 # 第八章 多态
+
+[参考](https://blog.csdn.net/doncoder/article/details/83243906)
 
 ## 8.1 再论向上转型
 
 ## 8.2 转机
+
+### 8.2.1 方法调用绑定
+
+- 将一个方法调用同一个方法主体关联起来被称作*绑定*。
+- 若在程序执行前进行绑定(如果有的话，由编译器和连接程序实现)，叫做*前期绑定*。
+- *后期绑定*，它的含义就是在运行时根据对象的类型进行绑定。后期绑定也叫做*动态绑定*或*运行时绑定*。
+- Java中除了`static`方法和`final`方法（`private`方法属于`final`方法）之外，其他所有的方法都是后期绑定。
+- **为什么要将某个方法声明为final呢？**正如之前提到的那样， 它可以防止其他人覆盖该方法。但更重要的一点或许是：这样做可以有效地“关闭”动态绑定，或者说，告诉编译器不需要对其进行动态绑定。这样，编译器就可以为final方法调用生成更有效的代码。
+
+### 8.2.2 产生正确的行为
+
+```java
+public class Shape{
+    public void draw(){}
+    public void erase(){}
+}
+
+public class Circle extends Shape{
+    public void draw(){ print("Circle.draw()"); }
+    public void erase(){ print("Circle.earse()"); }
+}
+
+public class Square extends Shape{
+    public void draw(){ print("Square.draw()"); }
+    public void erase(){ print("Square.earse()"); }
+}
+
+public class Triangle extends Shape{
+    public void draw(){ print("Triangle.draw()"); }
+    public void erase(){ print("Triangle.earse()"); }
+}
+
+public class RandomShapeGenerator{
+    private Random rand = new Random(47);
+    public Shape next(){
+        switch(rand.nextInt(3)){
+            default:
+            case 0: return new Circle();
+            case 1: return new Square();
+            case 2: return new Triangle();
+        }
+    }
+}
+
+public class Shapes{
+    private static RandomShapeGenerator gen = new RandomShapeGenerator();
+    public static void main(String[] args){
+        Shape[] s = new Shape[9];
+        for(int i = 0; i < s.length; i++){
+            s[i] = gen.next();
+        }
+        for(Shape shp : s){
+            shp.draw();
+        }
+    }
+}
+
+// Output:
+Triangle.draw()
+Triangle.draw()
+Square.draw()
+Triangle.draw()
+Square.draw()
+Triangle.draw()
+Square.draw()
+Triangle.draw()
+Circle.draw()
+```
+
+- 对draw()方法的所有调用都是通过动态绑定进行的。
+
+### 8.2.3 可扩展性
+
+- 法。在一个设计良好的OOP程序中，大多数或者所有方法只与基类接口通信。这样的程序是可扩展的，因为可以从通用的基类继承出新的数据类型，从而新添一些功能。那些操纵基类接口的方在去不需要任何改动就可以应用于新类。
 
 ## 8.3 构造器和多态
 

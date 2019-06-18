@@ -1391,7 +1391,7 @@ public class FinalArguments{
 - 将一个方法调用同一个方法主体关联起来被称作*绑定*。
 - 若在程序执行前进行绑定(如果有的话，由编译器和连接程序实现)，叫做*前期绑定*。
 - *后期绑定*，它的含义就是在运行时根据对象的类型进行绑定。后期绑定也叫做*动态绑定*或*运行时绑定*。
-- Java中除了`static`方法和`final`方法（`private`方法属于`final`方法）之外，其他所有的方法都是后期绑定。
+- Java中除了`static`方法和`final`方法(`private`方法属于`final`方法)之外，其他所有的方法都是后期绑定。
 - **为什么要将某个方法声明为final呢？**正如之前提到的那样， 它可以防止其他人覆盖该方法。但更重要的一点或许是：这样做可以有效地“关闭”动态绑定，或者说，告诉编译器不需要对其进行动态绑定。这样，编译器就可以为final方法调用生成更有效的代码。
 
 ### 8.2.2 产生正确的行为
@@ -1458,10 +1458,342 @@ Circle.draw()
 
 ### 8.2.3 可扩展性
 
-- 法。在一个设计良好的OOP程序中，大多数或者所有方法只与基类接口通信。这样的程序是可扩展的，因为可以从通用的基类继承出新的数据类型，从而新添一些功能。那些操纵基类接口的方在去不需要任何改动就可以应用于新类。
+- 在一个设计良好的OOP程序中，大多数或者所有方法只与基类接口通信。这样的程序是可扩展的，因为可以从通用的基类继承出新的数据类型，从而新添一些功能。那些操纵基类接口的方在去不需要任何改动就可以应用于新类。
+
+```java
+class Instrument{
+    void play(Note n){ print("Instrument.play()" + n); }
+    String what() { return "Instrument"; }
+    void adjust() { print("Adjusting Instrument");}
+}
+
+class Wind extends Instrument{
+    void play(Note n){ print("Wind.play()" + n); }
+    String what() { return "Wind"; }
+    void adjust() { print("Adjusting Wind");}
+}
+
+class Precussion extends Instrument{
+    void play(Note n){ print("Precussion.play()" + n); }
+    String what() { return "Precussion"; }
+    void adjust() { print("Adjusting Precussion");}
+}
+
+class Stringed extends Instrument{
+    void play(Note n){ print("Stringed.play()" + n); }
+    String what() { return "Stringed"; }
+    void adjust() { print("Adjusting Stringed");}
+}
+
+class Brass extends Wind{
+    void play(Note n){ print("Brass.play()" + n); }
+    String what() { return "Brass"; }
+    void adjust() { print("Adjusting Brass");}
+}
+
+class Woodwind extends Wind{
+    void play(Note n){ print("Woodwind.play()" + n); }
+    String what() { return "Woodwind"; }
+    void adjust() { print("Adjusting Woodwind");}
+}
+
+public class Music3{
+    public static void tune(Instrument i){
+        i.play(Note.MIDDLE_C);
+    }
+    public static void tuneAll(Instrument[] e){
+        for(Instrument i : e){
+            tune(i);
+        }
+    }
+    public static void main(String[] args){
+        Instrument[] orchestra = {
+            new Wind(),
+            new Percussion(),
+            new Stringed(),
+            new Brass(),
+            new Woodwind()
+        };
+        tuneAll(orchestra);
+    }
+}
+
+/*Output:
+Wind.play() MIDDLE_C
+Percussion.play() MIDDLE_C
+Stringed.play() MIDDLE_C
+Brass.play() MIDDLE_C
+Woodwind.play() MIDDLE_C
+*/
+```
+
+- 在main()中，当我们将某种引用置入orchestra数组中，就会自动向上转型到Instrument。
+- 可以看到， tune()方法完全可以忽略它周围代码所发生的全部变化，依旧正常运行。这正是我们期望多态所具有的特性。我们所做的代码修改，不会对程序中其他不应受到影响的部分产生破坏。换句话说，多态是一项让程序员“将改变的事物与未变的事物分离开来”的重要技术。
+
+### 8.2.4 缺陷：“覆盖”私有方法
+
+```java
+public class PrivateOverride{
+    private void f(){ print("private f()"); }
+    public static void main(String[] args){
+        PrivateOverride po = new Derived();
+        po.f();
+    }
+}
+
+class Derived extends PrivateOverride{
+    public void f(){
+        print("public f()");
+    }
+}
+
+/*Output
+private f()
+*/
+```
+
+- 只有非private方法才可以被覆盖;但是还需要密切注意覆盖private方法的现象，这时虽然编译器不会报错，但是也不会按照我们所期望的来执行。确切地说，在导出类中，对于基类中的private方法，最好采用不同的名字。
+
+### 8.2.5 缺陷：域与静态方法
+
+```java
+class Super{
+    public int field = 0;
+    public int getField() {
+        return field;
+    }
+}
+
+class Sub extends Super{
+    public int field = 1;
+    public int getField() {
+        return field;
+    }
+    public int getSuperField(){
+        return super.field;
+    }
+}
+
+public class FieldAccess{
+    public static void main(String[] args) {
+        Super sup = new Sub(); // 向上转型
+        System.out.println("sup.field = " + sup.field + " , sup.getField " + sup.getField()); //覆盖只发生在方法上，变量不会发生覆盖
+        Sub sub = new Sub();
+        System.out.println("sub.field = " + sub.field + " , sub.getField " + sub.getField() + ", sub.getSuperField = " + sub.getSuperField());
+    }
+}
+
+/*Output:
+sup.field = 0, sup.getField() = 1
+sub.field = 1, sub.getField() = 1, sub.getSuperField() = 0
+*/
+```
+
+- 如果某个方法是静态的，它的行为就不具有多态性：
+
+```java
+class StaticSuper{
+    public static String staitcGet(){
+        return "Base staticGet()";
+    }
+    public String dynamicGet(){
+        return "Base dynamicGet()";
+    }
+}
+
+class StaticSub extends StaticSuper{
+    public static String staticGet(){
+        return "Derived staticGet()";
+    }
+    public String dynamicGet(){
+        retun "Derived dynamicGet()";
+    }
+}
+
+public class StaticPolymorphism{
+    public static void main(String[] args){
+        StaticSuper sup = new SttaicSub(); //向上转型
+        System.out.println(sup.staticGet());
+        System.out.println(sup.dynamicGet());
+    }
+}
+/*Output:
+Base staticGet()
+Derived dynamicGet()
+*/
+```
 
 ## 8.3 构造器和多态
 
+### 8.3.1 构造器的调用顺序
+
+- 构造器具有一项特殊任务：检查对象是否被正确地构造。
+- 在导出类的构造器主体中，如果没有明确指定调用某个基类构造器，它就会“默默”地调用默认构造器。如果不存在默认构造器，编译器就会报错(若某个类没有构造器，编译器会自动合成出一个默认构造器)。
+- 调用构造器要遵照下面的顺序：
+  - 调用基类构造器。这个步骤会不断地反复递归下去，首先是构造这种层次结构的根，然后是下一层导出类，等等，直到最低层的导出类。
+  - 按声明顺序调用成员的初始化方法。
+  - 调用导出类构造器的主体。
+
+### 8.3.2 继承与清理
+
+- 万一某个子对象要依赖于其他对象，销毁的顺序应该和初始化顺序相反。对于字段，则意味着与声明的顺序相反(因为字段的初始化也是按照声明的顺序进行的)。对于基类，应该首先对其导出类进行清理，然后才是基类。
+
+### 8.3.3 构造器内部的多态方法的行为
+
+```java
+class Glyph{
+    void draw(){
+        print("Glyph.draw()");
+    }
+    Glyph(){
+        print("Glyph before draw()");
+        draw();
+        print("Glyph after draw()");
+    }
+}
+
+class RoundGlyph extends Glyph{
+    private int radius = 1;
+    RoundGlyph(int r){
+        radius = r;
+        print("RoundGlyph.RoundGlyph(), radius = " + radius);
+    }
+    void draw(){
+        print("RoundGlyph.draw(), radius = " + radius);
+    }
+}
+
+public class PloyConstructors{
+    public static void main(String[] args){
+        new RoundGlyph(5);
+    }
+}
+
+/*Output:
+Glyph before draw()
+RoundGlyph.draw(), radius = 0
+Glyph after draw()
+RoundGlyph.RoundGlyph(), radius = 5
+*/
+```
+
+- 初始化的实际过程是：
+  - 在其他任何事物发生之前，将分配给对象的存储空间初始化成二进制的零；
+  - 如前所述那样调用基类构造器。此时，调用被覆盖后的draw()方法(要在调用RoundGlyph构造器之前调用)，由于步骤1的缘故，我们此时会发现radius的值为0;
+  - 按照声明的顺序调用成员的初始化方法。
+  - 调用导出类的构造器主体。
+
+- 在构造器内唯一能够安全调用的那些方法是基类中的final方法(也适用于private方法，它们自动属于final方法)。
+
 ## 8.4 协变返回类型
 
+- Java SE5 中添加了**协变返回类型**，它表示在导出类中的被覆盖方法可以返回基类方法的返回类型的某种导出类型：
+
+```java
+class Grain{
+    public String toString(){
+        return "Grain";
+    }
+}
+
+class Wheat extends Grain{
+    public String toString(){
+        return "Wheat";
+    }
+}
+
+class Mill{
+    Grain process(){
+        return new Grain();
+    }
+}
+
+class WheatMill extends Mill{
+    Wheat process(){
+        return new Wheat;
+    }
+}
+
+public class CovariantReturn{
+    public static void main(String[] args){
+        Mill m = new Mill();
+        Grain g = m.process();
+        System.out.println(g);
+        m = new WheatMill();
+        g= m.process();
+        System.out.println(g);
+    }
+}
+/*Output:
+Grain
+Wheat
+*/
+```
+
+- Java SE5与Java较早版本之间的主要差异就是较早的版本将强制process()的覆盖版本必须返回Grain，而不能返回Wheat，尽管Wheat是从Grain导出的，因而也应该是一种合法的返回类型。协变返回类型允许返回更具体的Wheat类型。
+
 ## 8.5 用继承进行设计
+
+### 8.5.1 纯继承与扩展
+
+- 采取“纯粹”的方式来创建继承层次结构似乎是最好的方式。也就是说，只有在基类中已经建立的方法才可以在导出类中被覆盖。也可以认为这是一种纯替代，因为导出类可以完全代替基类。
+- 但是它也有缺点，导出类中接口的扩展部分不能被基类访问，因此， 一旦我们向上转型，就不能调用那些新方法。
+
+### 8.5.2 向下转型与运行时类型识别
+
+- 在Java语言中，所有转型都会得到检查；
+- 所以即使我们只是进行一次普通的加括弧形式的类型转换，在进入运行期时仍然会对其进行检查，以便保证它的确是我们希望的那种类型。如果不是，就会返回一个ClassCastException (类转型异常)。这种在运行期间对类型进行检查的行为称作“运行时类型识别”(RTTI)。
+
+```java
+class Useful{
+    public void f(){}
+    public void g(){}
+}
+
+class MoreUseful extends Useful{
+    public void f(){}
+    public void g(){}
+    public void u(){}
+    public void v(){}
+    public void w(){}
+}
+
+public class RTTI{
+    public static void main(String[] args){
+        Useful[] x = {
+            new Useful(),
+            new MoreUseful()
+        };
+        x[0].f();
+        x[1].g();
+        //Compile time: method not found in Useful:
+        // x[1].u();
+        ((MoreUseful)x[1]).u(); // DownCast/RTTI
+        ((MoreUseful)x[0]).u(); // Exception throw
+
+    }
+}
+```
+
+- 正如前一个示意图中所示，MoreUseful(更有用的)接口扩展了Useful(有用的)接口，但是有于它是继承而来的，所以它也可以向上转型到Useful类型。我们在main()方法中对数组x进行初始化时可以看到这种情况的发生。既然数组中的两个对象都属于Useful类， 所以我们可以调用f()和g()这两个方法。如果我们试图调用u()方法(它只存在于MoreUseful)，就会返回一条编译时出错消息。
+- 如果想访问MoreUseful对象的扩展接口，就可以尝试进行向下转型。如果所转类型是正确的类型，那么转型成功；否则，就会返回一个ClassCastException异常。
+
+# 第九章 接口
+
+## 9.1 抽象类和抽象方法
+
+## 9.2 接口
+
+## 9.3 完全解耦
+
+## 9.4 Java的多重继承
+
+## 9.5 通过继承来扩展接口
+
+## 9.6 适配接口
+
+## 9.7 接口中的域
+
+## 9.8 嵌套接口
+
+## 9.9 接口与工厂

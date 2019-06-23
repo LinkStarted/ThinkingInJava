@@ -1782,18 +1782,546 @@ public class RTTI{
 
 ## 9.1 抽象类和抽象方法
 
+- Java提供一个叫做抽象方法的机制，这种方法是不完整的，仅有声明而没有方法体。`abstract void f();`
+- 包含抽象方法的类叫做抽象类。如果一个类包含一个或多个抽象方法，该类必须被限定为抽象的。（否则，编译器就会报错。）
+- 如果从一个抽象类继承，并想创建该新类的对象，那么就必须为基类中的所有抽象方法提供方法定义。如果不这样做（可以选择不做），那么导出类便也是抽象类，且编译器将会强制我们用`abstract`关键字来限定这个类。
+- 我们也可能会创建一个没有任何抽象方法的抽象类
+
+```java
+abstract class Instrument{
+    private int i;
+    public abstract void play(Note n);
+    public String what(){ return "Instrument"; }
+    public abstract void adjust();
+}
+
+class Wind extends Instrument{
+    public void play(Note n){
+        print("Wind.play()" + n);
+    }
+    public String what(){ return "Wind"; }
+    public void adjust() {}
+}
+
+class Percussion extends Instrument{
+    public void play(Note n){
+        print("Percussion.play()" + n);
+    }
+    public String what(){ return "Percussion"; }
+    public void adjust() {}
+}
+
+class Stringed extends Instrument{
+    public void play(Note n){
+        print("Stringed.play()" + n);
+    }
+    public String what(){ return "Stringed"; }
+    public void adjust() {}
+}
+
+class Brass extends Wind{
+    public void play(Note n){
+        print("Brass.play()" + n);
+    }
+    public void adjust() { "Brass,adjust()"; }
+}
+
+class Woodwind extends Wind{
+    public void play(Note n){
+        print("Woodwind.play()" + n);
+    }
+    public String what(){ return "Woodwind"; }
+}
+
+public class Music4{
+    static void tune(Instrument i){
+        i.play(Note.MIDDLE_C);
+    }
+
+    static void tuneAll(Instrument[] e){
+        for(Instrument i : e){
+            tune(i);
+        }
+    }
+
+    public static void main(String[] args){
+        Instrument[] orchestra = {
+            new Wind(),
+            new Percussion(),
+            new Stringed(),
+            new Brass(),
+            new Woodwind();
+        };
+        tuneAll(orchestra);
+    }
+}
+/*Output:
+Wind.play() MIDDLE_C
+Percussion.play() MIDDLE_C
+Stringed.play() MIDDLE_C
+Brass.play() MIDDLE_C
+Woodwind.play() MIDDLE_C
+*/
+```
+
+- 总结：
+  - 有抽象方法的类必然是抽象类
+  - 抽象类不可以被实例化，不能被new来实例化抽象类
+  - 抽象类可以包含属性，方法，构造方法，但是构造方法不能用来new实例，只能被子类调用
+  - 抽象类只能用来继承
+  - 抽象类的抽象方法必须被子类重写
+
 ## 9.2 接口
+
+- `interface`这个关键字产生一个完全抽象的类，它根本就没有提供任何具体实现。它允许创建者确定方法名、参数列表和返回类型，但是没有任何方法体。接口只提供了形式，而来提供任何具体实现。
+- 接口也可以包含域(成员变量)，但是这些域隐式地是static和final的。
+- 实现接口使用`implements`关键字
+- 当要实现一个接口时，在接口中被定义的方法必须被定义为是public的
+- 在接口中方法没有被声明为是public的，那它们自动就都是public的
+
+```java
+interface Instrument{
+    int VALUE = 5; //static & final
+    // Caanot have method definitions
+    void play(Note n); // Automatically public
+    void adjust();
+}
+
+class Wind implements Instrument{
+    public void play(Note n){
+        print(this + ".play()" + n);
+    }
+    public String toString() { return "Wind"; }
+    public void adjust() { print(this + ".adjust()"); }
+}
+
+class Percussion implements Instrument{
+    public void play(Note n){
+        print(this + ".play()" + n);
+    }
+    public String toString() { return "Percussion"; }
+    public void adjust() { print(this + ".adjust()"); }
+}
+
+class Stringed implements Instrument{
+    public void play(Note n){
+        print(this + ".play()" + n);
+    }
+    public String toString() { return "Stringed"; }
+    public void adjust() { print(this + ".adjust()"); }
+}
+
+class Brass extends Wind{
+    public String toString() { return "Brass"; }
+}
+
+class Woodwind extends Wind{
+    public String toString() { return "Woodwind"; }
+}
+
+public class Music5{
+    static void tune(Instrument i){
+        i.play(Note.MIDDLE_C);
+    }
+    static void tuneAll(Instrument[] e){
+        for(Instrument i : e){
+            tune(i);
+        }
+    }
+public static void main(String[] args){
+        Instrument[] orchestra = {
+            new Wind(),
+            new Percussion(),
+            new Stringed(),
+            new Brass(),
+            new Woodwind();
+        };
+        tuneAll(orchestra);
+    }
+}
+/*Output:
+Wind.play() MIDDLE_C
+Percussion.play() MIDDLE_C
+Stringed.play() MIDDLE_C
+Brass.play() MIDDLE_C
+Woodwind.play() MIDDLE_C
+*/
+```
 
 ## 9.3 完全解耦
 
+- 策略设计模式
+
+```java
+class Processor{
+    public String name(){
+        return getClass().getSimpleName();
+    }
+    Object process(Object input){ return input; }
+}
+
+class Upcase extends Processor{
+    String process(Object input){
+        return ((String)input).toUpperCase();
+    }
+}
+
+class Downcase extends Processor{
+    String process(Object input){
+        return ((String)input).toLowerCase();
+    }
+}
+
+class Splitter extends Processor{
+    String process(Object input){
+        return Arrays.toString(((String)input).split(" "));
+    }
+}
+
+public class Apply{
+    public static void process(Processor p, Object s){
+        print("Using Processor" + p.name);
+        print(p.process(s));
+    }
+    public static String s = "Disagreement with beliefs is by definition incorrect";
+    public static void main(String[] args){
+        process(new Upcase(), s);
+        process(new Downcase(), s);
+        process(new Splitter(), s);
+    }
+}
+/*Output:
+Using Processor Upcase
+DISAGREEMENT WITH BELIEFS IS BY DEFINITION INCORRECT
+Using Processor Downcase
+disagreement with beliefs is by definition incorrect
+Using Processor Splitter
+[Disagreement, with, beliefs, is, by, definition, incorrect]
+*/
+```
+
 ## 9.4 Java的多重继承
+
+- 如果要从一个非接口的类继承，那么只能从一个类去继承。其余的基元素都必须是接口。需要将所有的接口名都置于implements关键字之后，用逗号将它们一一隔开。可以继承任意多个接口，并可以向上转型为每个接口，因为每一个接口都是一个独立类型。
+
+```java
+interface CanFight{
+    void fight();
+}
+
+interface CanSwim{
+    void swim();
+}
+
+interface CanFly{
+    void fly();
+}
+
+class ActionCharacter{
+    public void fight(){}
+}
+
+class Hero extends ActionCharacter implements CanFight,CanSwim,CanFly{
+    public void swim(){}
+    public void fly(){}
+}
+
+public class Advenrure{
+    public static void t(CanFight x) { x.fight(); }
+    public static void u(CanSwin x) { x.swin(); }
+    public static void v(CanFly x) { x.fly(); }
+    public static void w(ActionCharacter) x) { x.fight(); }
+    public static void main(String[] args){
+        Hero h = new Hero();
+        t(h);
+        u(h);
+        v(h);
+        w(h);
+    }
+}
+```
+
+- 当通过这种方式将一个具体类和多个接口组合到一起时，这个具体类必须放在前面，后面跟着的才是接口（否则编译器会报错）。
+- 当Hero对象被创建时，它可以被传递给这些方法中的任何一个，这意味着它依次被向上转型为每一个接口。
+- 前面的例子所展示的就是使用接口的核心原因：为了能够向上转型为多个基类型
+- 使用接口的第二个原因却是与使用抽象基类相同：防止客户端程序员创建该类的对象，并确保这仅仅是建立一个接口。
 
 ## 9.5 通过继承来扩展接口
 
+```java
+interface Monster{
+    void menace();
+}
+
+interface DangerousMonster extends Monster{
+    void destory();
+}
+
+interface Lethal{
+    void kill();
+}
+
+class DrangonZilla implements DangerousMonster{
+    public void menace(){}
+    public void destroy(){}
+}
+
+interface Vampre extends DangerousMonster, Lethal{
+    void drinkBlood();
+}
+
+class VeryBadVampire implements Vampire{
+    public void menace(){}
+    public void destroy(){}
+    public void kill(){}
+    public void drinkBlood(){}
+}
+
+public class HorrorShow{
+    static void u(Monster b ){ b.menace(); }
+    static void v(DangerousMonster d){
+        d.menace();
+        d.detory();
+    }
+    static void w(Lethal l){ l.kill(); }
+    public static void main(String[] args){
+        DangerousMonster barney = new DrangonZilla();
+        u.(barney);
+        v.(barney);
+        Vampire vlad = new VeryBadVampire();
+        u.(vlad);
+        v.(vlad);
+        w.(vlad);
+    }
+}
+```
+
+- 在Vampire中使用的语法**仅适用于接口继承**。一般情况下，只可以将extends用于单一类，但是可以引用多个基类接口。
+
+### 9.5.1 组合接口时的名字冲突
+
+```java
+interface interfac1{
+    void method();
+}
+interface interface2 {
+    int method();
+}
+interface interface3 extends interfac1,interface2{
+}
+```
+
+- 这段程序看上去是合理的，但是程序实则是错误的。这就涉及到方法的重载问题，这里仅用返回值作为区分是无法进行方法重载的，所以这两个接口中的method()方法，会被当做相同的方法。但是其返回值不同，又造成了矛盾。所以，程序会报错`The return types are incompatible for the inherited methods interfac1.f(), interface2.f()`
+
+- 对于方法重载的区分，主要通过下面三种方式:
+  - 参数个数
+  - 参数类型
+  - 参数顺序（较少使用，维护困难）
+- 至于方法的其他部分，如方法返回值类型、修饰符等，与方法重载则没有任何关系
+
 ## 9.6 适配接口
+
+- 接口的一种常见用法就是前面提到的策略设计模式
 
 ## 9.7 接口中的域
 
+- 放入接口中的任何域都自动是static和final的，所以接口就成为了一种很便捷的用来创建常量组的工具。
+- Java中标识具有常量初始化值的static final时，会使用大写字母的风格
+- 接口中的域自动是public的，所以没有显式地指明这一点。
+
+### 9.7.1 初始化接口中的域
+
+- 在接口中定义的域不能是“空final”，但是可以被非常量表达式初始化。
+- 这些域不是接口的一部分，它们的值被存储在该接口的静态存储区域内。
+
+```java
+public interface RandVals{
+    Random RAND = new Random(47);
+    int RANDOM_INT = new RAND.nextInt(10);
+    long RANDOM_LONG = new RAND.nextLong() * 10;
+    float RANDOM_FLOAT = new RAND.nextLong() * 10;
+    double RANDOM_DOUBLE = new RAND.nextDouble() * 10;
+}
+public calss TestRandVals{
+    public static void main(String[] args){
+        print(RandVals.RANDOM_INT);
+        print(RandVals.RANDOM_LONG);
+        print(RandVals.RANDOM_FLOAT);
+        print(RandVals.RANDOM_DOUBLE);
+    }
+}
+```
+
 ## 9.8 嵌套接口
 
+- 接口可以嵌套在类或其他接口中
+
+```java
+class A{
+    interface B{
+        void f();
+    }
+    public class BImp implements B{
+        public void f() {}
+    }
+    private class BImp2 implements B{
+        public void f() {}
+    }
+    public interface C{
+        void f();
+    }
+    class CImp implements C{
+        public void f() {}
+    }
+    private class CImp2 implements C{
+        public void f() {}
+    }
+    private interface D{
+        void f();
+    }
+    private class DImp implements D{
+        public void f(){}
+    }
+    public class DImp2 implements D{
+        public void f() {}
+    }
+    public D getD(){ retutn new DImp2(); }
+    private D dRef;
+    public void receiveD(D d){
+        dRef = d;
+        dRef.f();
+    }
+}
+
+interface E{
+    interface G{
+        void f();
+    }
+    public interface H{
+        void f();
+    }
+    void g();
+}
+
+public class NestingInterdaces{
+    public class BImp implements A.B{
+        public void f(){}
+    }
+    class CImp implements A.C{
+        public void f(){}
+    }
+    //Cannot implemnets a privare interface except
+    //within that interface's defining class
+    //class DImp implements A.D{
+    //    public void f(){}
+    //}
+    class EImp implements E{
+        public void g(){}
+    }
+    class EGImp implements E.G{
+        public void f(){}
+    }
+    class EImp2 implemets E{
+        public void g(){}
+        class EG implements E.G{
+            public void f(){}
+        }
+    }
+    public static void main(String[] args){
+        A a = new A();
+        //Cann't access A.D;
+        // A.D ad = a.getD();
+        //Doesn't return anything but A.D;
+        //A.DImp2 di2 = a.getD();
+        // Cannot access a member of the interface
+        // a.getD().f();
+        //Only another A can do anything with getD()
+        A a2 = new A();
+        a2.receiveD(a.getD());
+    }
+}
+```
+
 ## 9.9 接口与工厂
+
+- 接口是实现多重继承的途径，而生成遵循某个接口的对象的典型方式就是工厂方法设计模式。
+- 在工厂对象上调用的是创建方法，而该工厂对象将生成接口的某个实现的对象
+
+```java
+interface Service{
+    void method1();
+    void method2();
+}
+
+interface SerivceFactory{
+    Service getService();
+}
+
+class Implementation1 implements Service{
+    Implementation1(){}
+    public void method1(){ print("Implementation1 method1"); }
+    public void method2(){ print("Implementation1 method2"); }
+}
+
+class Implementation1Factory implements SerivceFactory{
+    public Service getService(){
+        return new Implementation1();
+    }
+}
+
+class Implementation2 implements Service{
+    Implementation2(){}
+    public void method1(){ print("Implementation2 method1"); }
+    public void method2(){ print("Implementation2 method2"); }
+}
+
+class Implementation2Factory implements SerivceFactory{
+    public Service getService(){
+        return new Implementation2();
+    }
+}
+
+public class Factories{
+    public static void serviceConsumer(ServiceFactory fact){
+        Service s = fact.getService();
+        s.method1();
+        s.method2();
+    }
+    public static void main(String[] args){
+        serviceConsumer(new Implementation1Factory());
+        serviceConsumer(new Implementation2Factory());
+    }
+}
+/*Output:
+Implementation1 method1
+Implementation1 method2
+Implementation2 method1
+Implementation2 method2
+*/
+```
+
+# 第十章 内部类
+
+## 10.1 创建内部类
+
+## 10.2 链接到外部类
+
+## 10.3 使用this与new
+
+## 10.4 内部类与向上转型
+
+## 10.5 在方法和作用域内的内部类
+
+## 10.6 匿名内部类
+
+## 10.7 嵌套类
+
+## 10.8 为什么需要内部类
+
+## 10.9 内部类的继承
+
+## 10.10 内部类可以被覆盖吗
+
+## 10.11 局部内部类
+
+## 10.12 内部类标识符

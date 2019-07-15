@@ -1783,8 +1783,8 @@ public class RTTI{
 ## 9.1 抽象类和抽象方法
 
 - Java提供一个叫做抽象方法的机制，这种方法是不完整的，仅有声明而没有方法体。`abstract void f();`
-- 包含抽象方法的类叫做抽象类。如果一个类包含一个或多个抽象方法，该类必须被限定为抽象的。（否则，编译器就会报错。）
-- 如果从一个抽象类继承，并想创建该新类的对象，那么就必须为基类中的所有抽象方法提供方法定义。如果不这样做（可以选择不做），那么导出类便也是抽象类，且编译器将会强制我们用`abstract`关键字来限定这个类。
+- 包含抽象方法的类叫做抽象类。如果一个类包含一个或多个抽象方法，该类必须被限定为抽象的。(否则，编译器就会报错。)
+- 如果从一个抽象类继承，并想创建该新类的对象，那么就必须为基类中的所有抽象方法提供方法定义。如果不这样做(可以选择不做)，那么导出类便也是抽象类，且编译器将会强制我们用`abstract`关键字来限定这个类。
 - 我们也可能会创建一个没有任何抽象方法的抽象类
 
 ```java
@@ -2041,7 +2041,7 @@ public class Advenrure{
 }
 ```
 
-- 当通过这种方式将一个具体类和多个接口组合到一起时，这个具体类必须放在前面，后面跟着的才是接口（否则编译器会报错）。
+- 当通过这种方式将一个具体类和多个接口组合到一起时，这个具体类必须放在前面，后面跟着的才是接口(否则编译器会报错)。
 - 当Hero对象被创建时，它可以被传递给这些方法中的任何一个，这意味着它依次被向上转型为每一个接口。
 - 前面的例子所展示的就是使用接口的核心原因：为了能够向上转型为多个基类型
 - 使用接口的第二个原因却是与使用抽象基类相同：防止客户端程序员创建该类的对象，并确保这仅仅是建立一个接口。
@@ -2116,7 +2116,7 @@ interface interface3 extends interfac1,interface2{
 - 对于方法重载的区分，主要通过下面三种方式:
   - 参数个数
   - 参数类型
-  - 参数顺序（较少使用，维护困难）
+  - 参数顺序(较少使用，维护困难)
 - 至于方法的其他部分，如方法返回值类型、修饰符等，与方法重载则没有任何关系
 
 ## 9.6 适配接口
@@ -2304,7 +2304,91 @@ Implementation2 method2
 
 ## 10.1 创建内部类
 
+```java
+public class Parcel2{
+    class Contents{
+        private int i = 11;
+        public int value(){
+            return i;
+        }
+    }
+    class Destination{
+        private String label;
+        Destionation(String whereTo){
+            label = whereTo;
+        }
+        String readLabel(){ return label; }
+    }
+    public Destionation to(String s){
+        return new Destionation(s);
+    }
+    public Contents contents(){
+        return new Contents();
+    }
+    public void ship(String dest){
+        Contents c = contents()
+        Destionation d = to(dest);
+        System.out.println(d.readLabel());
+    }
+    public static void main(String[] args){
+        Parcel2 p = new Parcel2();
+        p.ship("Tasmania");
+        Parcel2 q = new Parcel2();
+        Parcel2.Contents c = q.contents();
+        Parcel2.Destionation d = q.to("Borneo");
+    }
+}
+
+```
+
+- 如果想从外部类的非静态方法之外的任意位置创建某个内部类的对象，那么必须像在main()方法中那样，具体地指明这个对象的类型：`OuterClassNrune.InnerClassName` 。
+
 ## 10.2 链接到外部类
+
+- 当生成一个内部类的对象时，此对象与制造它的外围对象(enclosing object)之间就有了一种联系，所以它能访问其外围对象的所有成员，而不需要任何特殊条件。此外，**内部类还拥有其外围类的所有元素的访问权**。
+
+```java
+interface Selector{
+    boolean end();
+    Object current();
+    void next();
+}
+public class Sequence{
+    private Object[] items;
+    private int next = 0;
+    public Sequence(int size){ items = new Object[size]; }
+    public void add(Object x){
+        if(next < items.length){
+            items[next++] = x;
+        }
+    }
+    private class SequenceSelector implements Selector{
+        private int i = 0;
+        public boolean end() { return i==items.length; }
+        public Object current() { return items[i]; }
+        public void next() { if(i < items.length) i++; }
+    }
+    public Selector selector(){
+        return new SequenceSelector();
+    }
+    public static void main(String[] args){
+        Squence sequence = new Sequence(10);
+        for(int i = 0; i < 10; i++){
+            sequence.add(Integer.toString(i));
+        }
+        Selector selector = sequence.selector();
+        while(!selector.end()){
+            System.out.print(selector.current() + " ");
+            selector.next();
+        }
+    }
+}
+```
+
+- 最初看到SequenceSelector,可能会觉得它只不过是另一个内部类罢了。但请仔细观察它，注意方法end()、current()和next()都用到了object，这是一个引用，它并不是SequenceSelector的一部分，而是外围类中的一个private字段。然而内部类可以访问其外围类的方法和字段，就像自己拥有它们似的，这带来了很大的方便。
+- 内部类自动拥有对其外国类所有成员的访问权
+- 当某个外围类的对象创建了一个内部类对象时，此内部类对象必定会秘密地捕获一个指向那个外围类对象的引用。然后，在你访问此外围类的成员时，就是用那个引用来选择外围类的成员。
+- 内部类的对象只能在与其外围类的对象相关联的情况下才能被创建(就像你应该看到的，在内部类是非static类时)。构建内部类对象时，需要－个指向其外围类对象的引用，如果编译器访问不到这个引用就会报错。
 
 ## 10.3 使用this与new
 

@@ -2392,9 +2392,106 @@ public class Sequence{
 
 ## 10.3 使用this与new
 
+- 如果你需要生成对外部类对象的引用，可以使用外部类的名字后面紧跟圆点和this。这样产生的引用自动地具有正确的类型，这一点在编译期就被知晓并受到检查，因此没有任何运行时开销。
+
+```java
+
+public class DotThis{
+    void f(){ System.out.println("DotThis.f()"); }
+    public class Inner{
+        public DotThis outer(){
+            return DotThis.this;
+        }
+    }
+    public Inner inner() { return new Inner(); }
+    public static void main(String[] args){
+        DotThis dt = new Dotthis();
+        DotThis.Inner dti = dt.inner();
+        dti.outer().f();
+    }
+}
+```
+
+- 有时你可能想要告知某些其他对象，去创建其某个内部类的对象。要实现此目的，你必须在new表达式中提供对其他外部类对象的引用，这是需要使用.new语法。
+
+```java
+public class DotNew{
+    public class Inner {}
+    public static void main(String[] args){
+        DotNew dn = new DotNew();
+        DotNew.inner dnt = dn.new Inner();
+    }
+}
+```
+
+- 要想直接创建内部类的对象，你不能按照你想象的方式，去引用外部类的名字DotNew，而是必须使用外部类的对象来创建该内部类对象。
+- 在拥有外部类对象之前是不可能创建内部类对象的。这是因为内部类对象会暗暗地连接到创建它的外部类对象上。但是，如果你创建的是嵌套类(静态内部类)，那么它就不需要对外部类对象的引用。
+
+```java
+public class Parcel3 {
+    class Contents{
+        private int i = 11;
+        public int value() { return i; }
+    }
+    class Destionation{
+        private String label;
+        Destionation(String whereTo){
+            label = whereTo;
+        }
+        String readLabel() { return label; }
+    }
+    public static void main(String[] args){
+        Parcel3 p = new Parcel3();
+        Parcel3.Contents c = p.new Contents();
+        Parcel3.Destionation d = p.new Destionation("Tasmania");
+    }
+}
+```
+
 ## 10.4 内部类与向上转型
 
+- 当将内部类向上转型为其基类，尤其是转型为一个接口的时候，内部类就有了用武之地。这是因为此内部类某个接口的实现能够完全不可见，并且不可用。所得到的只是指向基类或接口的引用，所以能够很方便地隐藏实现细节。
+
+```java
+public interface Destionation {
+    String readLabel();
+}
+public interface Contents {
+    int value();
+}
+
+class Parcel4 {
+    private class PContents implements Contents {
+        private int i = 11;
+        public int value() { return i; }
+    }
+    protected class PDestionation implements Destionation {
+        private String label;
+        private PDestionation(String whereTo){
+            label = whereTo;
+        }
+        public String readLabel() { return label; }
+    }
+    public Destionation destionation(String s){
+        return new PDestionation(s);
+    }
+    public Contents contents(){
+        return new PContents();
+    }
+}
+
+public class TestParcel{
+    public static void main(String[] args){
+        Parcel4 p = new Parcel4();
+        Contents c = p.contents();
+        Destionation d = p.destionation("Tasmania");
+        // Parcel4.PContents pc = p.new PContents(); illegal -- cannot access private class
+    }
+}
+```
+
 ## 10.5 在方法和作用域内的内部类
+
 
 ## 10.6 匿名内部类
 

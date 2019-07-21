@@ -2492,12 +2492,307 @@ public class TestParcel{
 
 ## 10.5 在方法和作用域内的内部类
 
+- 在方法的作用域内(而不是在其他类的作用域内)创建一个完整的类。这被称作局部内部类。
+
+```java
+interface Destination {
+    String readLabel();
+}
+interface Contents {
+    int value();
+}
+
+public class Parcel5{
+    public Destination destination(String s){
+        class PDestination implements Destination{
+            private String label;
+            private PDestination(String whereTo){
+                label = whereTo;
+            }
+            public String readLabel() { return label; }
+        }
+
+        return new PDestination(s);
+    }
+    public static void main(String[] args){
+        Parcel5 p = new Parcel5();
+        Destination d  = p.destination("Tasmania");
+    }
+}
+```
+
+- 在任意作用域内嵌入一个内部类
+
+```java
+public class Parcel6{
+    private void internalTracking(boolean b){
+        if(b){
+            class TrackingSlip{
+                private String id;
+                TrackingSlip(String s){
+                    id = s;
+                }
+                String getSlip() { return id; }
+            }
+            TrackingSlip ts = new TrackingSlip("Slip");
+            String s = ts.getSlip();
+        }
+    }
+    public void track() { internalTracking(true); }
+    public static void main(String[] args){
+        Parcel6 p = new Parcel6();
+        p.track();
+    }
+}
+```
+
+- TrackingSlip类被嵌入在if语句的作用域内，这并不是说该类的创建是有条件的，它其实与别的类一起编译过了。然而，在定义TrackingSlip的作用域之外，它是不可用的，除此之外，它与普通的类一样。
 
 ## 10.6 匿名内部类
 
-## 10.7 嵌套类
+- 创建一个**继承**自Contents的匿名类的对象。通过new表达式返回的引用被自动向上转型为对Contents的引用。
+
+```java
+class Contents{
+    private int i;
+    public int value() {
+        return i;
+    }
+}
+
+public class Parcel7{
+    public Contents contents(){
+        return new Contents(){
+            private int i = 11;
+            public int value() { return i; }
+        };//需要加上逗号
+    }
+    public static void main(String[] args){
+        Parcel7 p = new Parcel7();
+        Contents c = p.contents();
+    }
+}
+```
+
+- 上述代码展示了在匿名内部类中，使用了默认的构造器来生成Contents。下面的代码展示的是，如果你的基类需要一个有参数的构造器，应该怎么办：
+
+```java
+class Wrapping{
+    private int i;
+    public Wrapping(int x) {
+        i = x;
+    }
+    public int value() {
+        return i;
+    }
+}
+public class Parcel8{
+    public Wrapping wrapping(int x){
+        return new Wrapping(x){
+            public int value(){
+                return super.value() * 47;
+            }
+        };
+    }
+    public static void main(String[] args){
+        Parcel8 p = new Parcel();
+        Wrapping w = p.wrapping(10);
+    }
+}
+```
+
+- 只需简单地传递合适地参数给基类地构造器即可，这里是将x传进new Wrapping(x)。尽管Wrapping只是一个具有具体实现地普通类，但它还是被其导出类当作公共“接口”来使用。
+- 匿名内部类末尾地分号，并不是用来标记此内部类结束的。实际上，它标记的是表达式的结束，只不过这个表达式正巧包含了匿名内部类罢了。
+- 在匿名类中定义字段时，还能够对其执行初始化操作。
+
+```java
+interface Destination {
+    String readLabel();
+}
+
+public class Parcel9{
+    public Destination destination(final String dest){
+        return new Destination(){
+            private String label = dest;
+            public String readLabel(){ return label; }
+        };
+    }
+    public static void main(String[] args){
+        Parcel9 p = new Parcel9();
+        Destination d = p.destination("Tasmania");
+    }
+}
+```
+
+- 如果定义一个匿名内部类，并且希望它使用一个在其外部定义的对象，那么编译器会要求其参数引用是final的。
+- 在匿名类中不可能有命名构造器(因为它根本没有名字)，但通过实例初始化，就能够达到为匿名内部类创建一个构造器的效果。
+
+```java
+abstract class Base{
+    public Base(int i){
+        System.out.println("Base constructor, i = " + i);
+    }
+    public abstract void f();
+}
+public class AnonymousConstructor{
+    public static Base getBase(int i){
+        return new Base(i){
+            { System.out.println("Inside instance initializer"); } //代码块充当了无参构造器
+            public void f(){
+                System.out.println("In anonymous f()");
+            }
+        };
+    }
+    public static void main(String[] args){
+        Base base = getBase(47);
+        base.f();
+    }
+}
+/*Output:
+Base constructor, i = 47
+Inside instance initializer
+In anonymous f()
+*/
+```
+
+- 在此例中，不要求变量i一定是final的。因为i被传递给匿名类的基类的构造器，它并不会在匿名类内部使用。
+
+```java
+interface Destination {
+    String readLabel();
+}
+public class Parcel10{
+    public Destination destination(final String dest, final float price){
+        return new Destination(){
+            private int cost;
+            {
+                cost = Math.round(price);
+                if(cost > 100){
+                    System.out.println("Over Bugget");
+                }
+            }
+            private String label = dest;
+            public String readLabel(){ return label; }
+        };
+    }
+    public static void main(String[] args){
+        Parcel10 p = new Parcel10();
+        Destination d = p.destination("Tasmania", 101.395F);
+    }
+}
+```
+
+- 在实例化操作的内部，可以看到有一段代码，他们不能作为字段初始化动作一部分来执行(就是if语句)。所以对于匿名类而言，实例初始化的实际效果就是构造器。当然它受到了限制，你不能重载实例初始化方法，所以你仅有一个这样的构造器。
+- 匿名内部类与正规的继承相比有些受限，因为匿名内部类既可以扩展类，也可以实现接口。但两者不能兼备。而且如果是实现接口，也只能实现一个接口。
+
+## 10.7 嵌套类/静态内部类
+
+- 静态内部类：不需要内部类对象与其外围类对象之间的联系，可以将内部类声明为static。
+- 普通的内部类对象隐式地保存了一个引用，指向创建它的外围类对象。然而，当内部类是static时，静态内部类意味着：
+  - 要创建静态内部类对象，并不需要外围类对象；
+  - 不能从静态内部类对象中访问非静态的外围类对象。
+
+- 静态内部类与普通的内部类还有一个区别。普通内部类的字段与方法，只能放在类的外部层次上，所以普通内部类不能有static数据和static字段，也不能包含静态内部类。但静态内部类可以包含这些。
+
+```java
+interface Destination {
+    String readLabel();
+}
+interface Contents {
+    int value();
+}
+
+public class Parcel11{
+    private static class ParcelContents implements Contents {
+        private int i = 11;
+        public int value(){ return i; }
+    }
+    protected static class ParcelDestination implements Destination {
+        private String label;
+        private ParcelDestination(String whereTo){
+            label = whereTo;
+        }
+        public String readLabel(){ return label; }
+        public static void f(){}
+        static int x  = 10;
+        static class AnotherLevel{
+            public static void f(){}
+            static int x = 10;
+        }
+    }
+    public static Destination destination(String s){
+            return new ParcelDestination(s);
+    }
+    public static Contents contents(){
+        return new ParcelContents();
+    }
+    public static void main(String[] args){
+        Contents c = contents();
+        Destination d = destination("Tasmania");
+    }
+}
+```
+
+- 在一个普通的(非static)内部类中，通过特殊的this引用可以链接到其外围类对象。静态内部类就没有这个特殊的this引用，这使得它类似于一个static方法。
+
+### 10.7.1 接口内部的类
+
+- 正常情况下，不能在接口内部放置任何代码，但静态内部类可以作为接口的一部分。你放到接口中的任何类都是自动地是public和static的。因为类是static的，只是将静态内部类置于接口的命名空间内，这并不违反接口的规则。你甚至可以在内部类中实现其外围接口。
+
+```java
+public interface ClassInInterface{
+    void howdy();
+    class Test implements ClassInInterface{
+        public void howdy(){
+            System.out.println("Howdy!");
+        }
+        public static void main(String[] args){
+            new Test().howdy();
+        }
+    }
+}
+```
+
+### 10.7.2 从多层静态内部类中访问外部类的成员
+
+- 一个内部类被嵌套多少层并不重要，它能透明地访问所有它所嵌入的外围类的所有成员。
+
+```java
+class MNA{
+    private void f(){}
+    class A{
+        private void g(){}
+        public class B{
+            void h(){
+                g();
+                f();
+            }
+        }
+    }
+}
+
+public class MultiNestingAccess{
+    public static void main(String[] args){
+        MNA mna = new MNA();
+        MNA.A mmna = mna.new A();
+        MNA.A.B mmnab = mmna.new B();
+        mmnab.h();
+    }
+}
+```
+
+- 可以看到在MNA.A.B中，调用方法g()和f()不需要任何条件(即使它们被定义为 private)。这个例子同时展示了如何从不同的类里创建多层嵌套的内部类对象的基本语法。“`.new`”语法能产生正确的作用域，所以不必在调用构造器时限定类名。
 
 ## 10.8 为什么需要内部类
+
+- 一般说来，内部类继承自某个类或实现某个接口，内部类的代码操作创建它的外围类的对象。所以可以认为内部类提供了某种进入其外围类的窗口。
+- 使用内部类最吸引人的原因是：
+  - 每个内部类都能独立地继承自一个（接口的）实现，所以无论外围类是否已经继承了某个（接口的）实现，对于内部类都没有影响。
+- 内部类使得多重继承的解决方案变得完整。接口解决了部分问题，而内部类有效地实现了“多重继承”。也就是说，内部类允许继承多个非接口类型（译注：类或抽象类）。
+- 让我们考虑这样－种情形：即必须在一个类中以某种方式实现两个接口。由于接口的灵活性，你有两种选择：使用单一类，或者使用内部类：
+
+```java
+```
 
 ## 10.9 内部类的继承
 

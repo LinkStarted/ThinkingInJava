@@ -955,7 +955,7 @@ A@1a46e30 A@3e25a5 A@19821f
     }
     ```
 
-- 一些有用的特性： 
+- 一些有用的特性：
 
   - `toString()`: 可以很方便地显示某个enum实例的名字
   - `ordinal()`: 用来表示某个特定enum常量的声明顺序
@@ -1148,7 +1148,7 @@ class Soap{
 }
 
 public class Bath{
-    private String 
+    private String
         s1 = "Happy",
         s2 = "Happy",
         s3,s4;
@@ -1166,7 +1166,7 @@ public class Bath{
         if(s4 == null){
             s4 = "Joy";//Delayed initializtion
         }
-        return 
+        return
             "s1 = " + s1 + "\n" +
             "s2 = " + s2 + "\n" +
             "s3 = " + s3 + "\n" +
@@ -2931,7 +2931,7 @@ Other operation
 
 ### 10.8.2 内部类与控制框架
 
-- 应用程序框架（application framework）就是被设计用以解决某类特定问题的一个类或一组类。要运用某个应用程序框架，通常是继承一个或多个类，并覆盖某些方法。在覆盖后的方法中，编写代码定制应用程序框架提供的通用解决方案，以解决你的特定问题。
+- 应用程序框架(application framework)就是被设计用以解决某类特定问题的一个类或一组类。要运用某个应用程序框架，通常是继承一个或多个类，并覆盖某些方法。在覆盖后的方法中，编写代码定制应用程序框架提供的通用解决方案，以解决你的特定问题。
 - Java Swing库就是一个控制框架，它优雅地解决了GUI的问题，并使用了大量的内部类。
 
 ## 10.9 内部类的继承
@@ -3107,11 +3107,196 @@ Anonymous inner9
 
 ## 11.1 泛型和类型安全容器
 
+- 泛型，即“参数化类型”。`List<String> list = new ArrayList<String>()`
+- ArrayList不使用泛型的情况下，有可能会出现类型安全的问题。因为ArrayList保存的是Object，所以可以将Apple对象和Banana对象放进容器中，当在使用ArrayList的get()方法来取出Apple对象时，得到的只是Object的引用，必须将其转型为Apple,因此，需在调用Apple的id()方法之前，强制进行转型，否则，就会得到编译错误。
+
+```java
+public class Apple {
+    private static int counter;
+    private final int id = counter++;
+    public int id(){
+        return id;
+    }
+}
+public class Banana {}
+
+public class AppleOrBanana {
+    @SuppressWarnings({"rawtypes","unchecked"})
+    public static void main(String[] args) {
+        //定义一个ArrayList容器，不指定其类型
+        ArrayList apples =new ArrayList();
+        for(int i = 0; i < 3; i++){
+            apples.add(new Apple());
+        }
+
+        apples.add(new Banana());
+
+        //以上代码运行后会出现apples容器中存在了4个对象，其中前面三个为
+        //Apple类型，后面一个为Banana类型
+        for (int i = 0; i < apples.size(); i++)
+            {
+             //get()方法取值时, 得到的只是Object的引用, 必须将其强制转型为Apple, 否则编译错误
+             //当试图将Banana对象转型为Apple时, 发生类型转换异常
+             System.out.println(((Apple)apples.get(i)).id());
+            }
+    }
+}
+```
+
+- 刚才声明容器时没有预先定义类型，默认为Object，现在使用预定义泛型，可以发现定义了容器类型后，编译器可以阻止将Orange放置到apples中，因为此时Banana对象的类型与容器类型不匹配，发生编译错误；另外，将元素从容器中取出时，类型转换也不再时必须的了，因为容器知道自己保存的是什么类型，因此会在调用get()时帮忙转型。
+
+```java
+
+public class AppleOrBanana2 {
+    public static void main(String[] args) {
+        //定义一个保存Apple对象的ArrayList, 尖括号括起来的是类型参数
+        //它指定了这个容器示例可以保存的类型, 通过使用泛型, 就可以在编译器放置将错误类型的对象放置到容器中
+        ArrayList<Apple> apples = new ArrayList<Apple>();
+        for (int i = 0; i < 3; i++) {
+            apples.add(new Apple());
+        }
+        //apples.add(new Banana());  编译器可以阻止将Banana放置到apples中
+        for (int i = 0; i < apples.size(); i++) {
+            System.out.println(apples.get(i).id());
+        }
+        for (Apple c : apples) {
+            System.out.println(c.id());
+        }
+    }
+}
+```
+
 ## 11.2 基本概念
+
+- Java 容器类类库的用途是“保存对象”，并将其划分为两个不同的概念：
+  - Collection。一个独立元素的序列，这些元素都服从一条或多条规则。List 必须按照插入的顺序保存元素，而Set不能有重复元素。Queue按照排队规则来确定对象产生的顺序(通常与它们被插入的顺序相同)。
+  - Map。一组成对的“键值对”对象，允许你使用键来查找值。
 
 ## 11.3 添加一组元素
 
+- `Arrays.asList()`方法接受一个数组或是一个用逗号分隔的元素列表(使用可变列表)，并将其转换为一个List对象。
+- `Collections.addAll()`方法接受一个Collection对象，以及一个数组或是一个用逗号分隔的列表，将元素添加到Collction中。
+- `Collection.addAll()`成员方法只能接受另一个Collection对象作为参数，因此，它不如Arrays.asList()或Collections.addAll()灵活。但是Collection.addAll()运行起来要快得多
+
+```java
+public class AddingGroups {
+    public static void main(String[] args) {
+        Collection<Integer> collection = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6));
+        Integer[] moreInts = {7, 8, 9, 10};
+        collection.addAll(Arrays.asList(moreInts));
+        // Runs significantly faster, but you can't
+        // construct a Collection this way:
+        // 将11，12，13，14，15添加到collection中去
+        Collections.addAll(collection, 11, 12, 13, 14, 15);
+        // 将moreInts添加到collection中去
+        Collections.addAll(collection, moreInts);
+
+
+        // Produces a list "backed by" an array:
+        List<Integer> list = Arrays.asList(16, 17, 18, 19, 20);
+        // 将list中索引为1的元素设为99
+        list.set(1, 99);    // OK--modify an element
+        // list.add(21);    // Runtime error because the
+                            // underlying array cannot be resized
+    }
+}
+```
+
+```java
+class Snow {}
+class Powder extends Snow {}
+class Light extends Powder {}
+class Heavy extends Powder {}
+class Crusty extends Snow {}
+class Slush extends Snow {}
+
+public class AsListInference {
+    public static void main(String[] args) {
+    List<Snow> snow1 = Arrays.asList(
+                new Crusty(), new Slush(), new Powder()
+        );
+
+        // 可以编译生成的List不会是Powder类型而是Snow
+        List<Snow> snow2 = Arrays.asList(
+                new Light(), new Heavy()
+        );
+
+        List<Snow> snow3 = new ArrayList<>();
+        Collections.addAll(snow3, new Light(), new Heavy());
+
+        List<Snow> snow4 = Arrays.<Snow>asList(
+                new Light(), new Heavy()
+        );
+    }
+}
+```
+
+- 上面四种方式现在都是可以的，其中snow2在Java8以前是编译不了的。这样看的话第四种方式现在就显得有点多余了，当然你得使用Java8。
+
 ## 11.4 容器的打印
+
+-对于数组的打印，必须使用Arrays.toString()方法来产生数组的的可表示打印，但是打印容器无需任何帮助。
+
+```java
+public class PrintingContainers {
+    static Collection fill(Collection<String> collection) {
+        collection.add("rat");
+        collection.add("cat");
+        collection.add("dog");
+        collection.add("dog");
+        return collection;
+    }
+
+    static Map fill(Map<String, String> map) {
+        map.put("rat", "Fuzzy");
+        map.put("cat", "Rags");
+        map.put("dog", "Bosco");
+        map.put("dog", "Spot");
+        return map;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(fill(new ArrayList<String>()));
+        System.out.println(fill(new LinkedList<String>()));
+        System.out.println(fill(new HashSet<String>()));
+        System.out.println(fill(new TreeSet<String>()));
+        System.out.println(fill(new LinkedHashMap<String, String>()));
+        System.out.println(fill(new HashMap<String, String>()));
+        System.out.println(fill(new TreeMap<String, String>()));
+        System.out.println(fill(new LinkedHashMap<String, String>()));
+
+        int [] arg = {1,2,3,4};
+        System.out.println(Arrays.toString(arg));
+    }
+}
+/*
+[rat, cat, dog, dog]
+[rat, cat, dog, dog]
+[rat, cat, dog]
+[cat, dog, rat]
+{rat=Fuzzy, cat=Rags, dog=Spot}
+{rat=Fuzzy, cat=Rags, dog=Spot}
+{cat=Rags, dog=Spot, rat=Fuzzy}
+{rat=Fuzzy, cat=Rags, dog=Spot}
+[1, 2, 3, 4]
+
+ */
+```
+
+- 这里展示了Java容器类库中的两种主要类型，它们的区别在于容器中每个“槽”保存的元素个数。
+- Collection在每个槽中只能保存一个元素。
+  - List，它以特定的顺序保存一组元素，
+  - Set，元素不能重复，
+  - Queue，只允许在容器的一“端”插入对象，并从另外一“端”移除对象
+- ArrayList和LinkedList都是List类型，从输出可以看出，它们都按照被插入的顺序保存元素。两者的不同之处不仅在于执行某些类型的操作时的性能，而且LinkedList包含的操作也多于ArrayList。
+- HashSet、TreeSet和LinkedHashSet都是Set类型，输出显示在Set中，每个相同的项只有保存一次。
+  - HashSet是最快的获取元素方式
+  - 如果存储顺序很重要，那么可以使用TreeSet，它按照比较结果的升序保存对象，或者使用LinkedHashSet，它按照被添加的顺序保存对象。
+- Map(也被称为关联数组)使得你可以用键来查找对象，对于每一个键，Map只接受存储一次。
+  - `Map.put(key, value)`方法将增加一个值(你想要增加的对象)，并将它与某个键(你用来查找这个值的对象)关联起来。`Map.get(key)`方格将产生与这个键相关联的值
+  - HashMap也提供了最快的查找技术
+  - TreeMap按照比较结果的升序保存键，而LinkedHashMap则按照插入顺序保存键，同时还保留了HashMap的查询速度。
 
 ## 11.5 List
 

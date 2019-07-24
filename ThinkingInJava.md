@@ -3300,11 +3300,238 @@ public class PrintingContainers {
 
 ## 11.5 List
 
+- 有两种类型的List:
+  - ArrayList底层是用数组实现的，它长于随机访问元素，但是在List的中间插入和移除元素时较慢。
+  - LinkedList底层是通过双向链表实现的，它通过代价较低的在List中间进行的插入和删除操作，提供了优化的顺序访问。LinkedList在随机访问方面相对比较慢，但是它的特性集较ArrayList更大。
+
+- 添加元素  
+  `boolean add(int index, E element)`  
+  `boolean addAll(index,Collection)`
+
+```java
+public static void List_add(){
+   ArrayList a1 = new ArrayList();
+   a1.add("java");
+   a1.add("php");//List集合中的元素可以重复
+   a1.add(".net");
+   System.out.println("原集合："+a1);
+   a1.add(1, "Flash");
+   a1.add(0, "ps");  
+   System.out.println(a1);
+
+  ArrayList a2 = new ArrayList();
+  a2.add("javascript");
+  a2.add("3dMax");
+  a2.add("IBM");
+
+  a1.addAll(0, a2);
+  System.out.println(a1);
+}
+```
+
+- 删除元素  
+  `boolean remove(int index)`
+
+```java
+public static void List_remove(){
+   ArrayList a1 = new ArrayList();
+   a1.add("javascript");
+   a1.add("php");
+   a1.add("flash");
+   System.out.println("原集合："+a1);
+
+   a1.remove(0);
+   System.out.println(a1);
+}
+```
+
+- 修改元素  
+  `set(int index, E element)`,返回的是所在位置修改前的那个元素  
+
+```java
+public static void List_set() {
+   ArrayList a1 = new ArrayList();
+   a1.add("javascript");
+   a1.add("php");
+   a1.add(".net");
+   System.out.println("原集合："+a1);
+
+   a1.set(1, "falsh");
+   System.out.println(a1);
+}
+```
+
+- 查找元素  
+  `get(int index)`,返回列表中指定位置的元素  
+  `subList(int fromIndex, int toIndex)`,返回列表中指定的fromIndex（包括）和toIndex（不包括）之间的部分元素。
+
+```java
+public static void List_get() {
+   ArrayList a1 = new ArrayList();
+   a1.add("java");
+   a1.add("php");
+   a1.add("flash");
+   System.out.println(a1.get(0));//获取指定角标的元素，有了该方法就可以遍历该集合中的所有元素
+   System.out.println(a1.subList(1, 3));//获取集合中某一部分的元素,包含头不包含尾
+}
+```
+
+- 获得集合内元素个数:`list.size();`
+- 清空集合：`list.clear();`
+- 判断集合中是否存在某个元素（存在返回true，不存在返回false）：`list.contains(e);`
+- 元素存在则返回找到的第一个元素的下标，不存在则返回-1：`list.indexOf(e);`
+- 元素存在则返回找到的最后一个元素的下标，不存在则返回-1：`list.lastIndexOf(e);`
+- 判断集合是否为空（空则返回true，非空则返回false）：`list.isEmpty();`
+- 将集合转换为数组：`list.toArray();`
+
 ## 11.6 迭代器
+
+- 迭代器是一个对象，它的工作是遍历并选择序列中的对象
+- Java的Iterator只能单向移动，这个Iterator只能用来：
+  - 使用方法`iterator()`要求容器返回一个Iterator。Iterator将准备好返回序列的第一个元素。
+  - 使用`next()`获得序列中的下一个元素。
+  - 使用`hasNext()`检查序列中是否还有元素。
+  - 使用`remove()`将迭代器新近返回的元素删除。
+
+```java
+public class IteratorTest{
+//  功能使用HashSet存储、删除、遍历几个学生的信息
+    HashSet<Student> hash = new HashSet<Student>();
+    hash.add(new Student("张三", 20));
+    hash.add(new Student("李四", 21));
+    hash.add(new Student("王二", 22));
+    hash.add(new Student("麻子", 23));
+
+    String st1 = "hello";
+    String st2 = "hello";
+    String st3 = st2;
+    System.out.println(st1 == st3);
+
+//  删除一个姓名为张三的学生
+    String name1 = "张三";
+    boolean flag = true;
+
+    Iterator<Student> it = hash.iterator();
+    while(it.hasNext()){
+        Student s = it.next();
+        if(name1.equals(s.getName())){
+            it.remove();
+            flag = false;
+            break;
+        }
+    }
+    if(flag){
+        System.out.println("不存在");
+    }
+    for (Student s : hash) {
+         System.out.println(s);
+    }
+}
+```
+
+### 11.6.1 ListIterator
+
+- Listlterator是一个更加强大的Iterator的子类型，它只能用于各种List类的访问。尽管Iterator只能向前移动，但是Listlterator可以双向移动。
+- ListIterator迭代器包含的方法有：
+  - `void add(E e)`: 将指定的元素插入列表，插入位置为迭代器当前位置之前
+  - `boolean hasNext()`：以正向遍历列表时，如果列表迭代器后面还有元素，则返回 true，否则返回false
+  - `boolean hasPrevious()`:如果以逆向遍历列表，列表迭代器前面还有元素，则返回 true，否则返回false
+  - `E next()`：返回列表中ListIterator指向位置后面的元素
+  - `E previous()`:返回列表中ListIterator指向位置前面的元素
+  - `int nextIndex()`:返回列表中ListIterator所需位置后面元素的索引
+  - `int previousIndex()`：返回列表中ListIterator所需位置前面元素的索引
+  - `void remove()`:从列表中删除next()或previous()返回的最后一个元素
+  - `void set(E e)`：从列表中将next()或previous()返回的最后一个元素返回的最后一个元素更改为指定元素e
 
 ## 11.7 LinkedList
 
+- LinkedList 是一个用链表实现的集合，元素有序且可以重复。
+- **添加元素**
+  - `addFirst(E e)`:将指定元素添加到链表头
+  - `addLast(E e)和add(E e)`:将指定元素添加到链表尾
+  - `add(int index, E element)`:将指定的元素插入此列表中的指定位置
+  - `addAll(Collection c)`:按照指定集合的​​迭代器返回的顺序，将指定集合中的所有元素追加到此列表的末尾
+- **删除元素**
+  - `remove()`和`removeFirst()`：从此列表中移除并返回第一个元素
+  - `removeLast()`：从该列表中删除并返回最后一个元素
+  - `remove(int index)`：删除此列表中指定位置的元素
+  - `remove(Object o)`：如果存在，则从该列表中删除指定元素的第一次出现
+- **修改元素**
+  - `set(int index, E element)`：用指定的元素替换此列表中指定位置的元素
+- **查找元素**
+  - `getFirst()`：返回此列表中的第一个元素
+  - `getLast()`：返回此列表中的最后一个元素
+  - `get(int index)`：返回指定索引处的元素
+  - `indexOf(Object o)`：返回此列表中指定元素第一次出现的索引，如果此列表不包含元素，则返回-1。
+
 ## 11.8 Stack
+
+- Stack是栈。它的特性是：先进后出(FILO, First In Last Out)
+- java工具包中的Stack是继承于Vector(矢量队列)的，由于Vector是通过数组实现的，这就意味着，Stack也是通过数组实现的，而非链表。当然，我们也可以将LinkedList当作栈来使用！
+- Stack只有一个无参构造函数
+- 属于stack自己的方法包括:
+  - push(): 将元素推入栈中，是通过将元素追加的数组的末尾中
+  - peek(): 取出栈顶元素，不执行删除，
+  - pop(): 取出栈顶元素，并将该元素从栈中删除
+  - empty(): 判定栈是否为空
+  - search(E e): 判断元素是否在栈中，如果在返回1，不在返回-1
+
+```java
+public class StackTest {
+
+    public static void main(String[] args) {
+        Stack stack = new Stack();
+        // 将1,2,3,4,5添加到栈中
+        for(int i=1; i<6; i++) {
+            stack.push(String.valueOf(i));
+        }
+
+        // 遍历并打印出该栈
+        iteratorThroughRandomAccess(stack) ;
+
+        // 查找“2”在栈中的位置，并输出
+        int pos = stack.search("2");
+        System.out.println("the postion of 2 is:"+pos);
+
+        // pup栈顶元素之后，遍历栈
+        stack.pop();
+        iteratorThroughRandomAccess(stack) ;
+
+        // peek栈顶元素之后，遍历栈
+        String val = (String)stack.peek();
+        System.out.println("peek:"+val);
+        iteratorThroughRandomAccess(stack) ;
+
+        // 通过Iterator去遍历Stack
+        iteratorThroughIterator(stack) ;
+    }
+
+    /**
+     * 通过快速访问遍历Stack
+     */
+    public static void iteratorThroughRandomAccess(List list) {
+        String val = null;
+        for (int i=0; i<list.size(); i++) {
+            val = (String)list.get(i);
+            System.out.print(val+" ");
+        }
+        System.out.println();
+    }
+
+    /**
+     * 通过迭代器遍历Stack
+     */
+    public static void iteratorThroughIterator(List list) {
+
+        String val = null;
+        for(Iterator iter = list.iterator(); iter.hasNext(); ) {
+            val = (String)iter.next();
+            System.out.print(val+" ");
+        }
+        System.out.println();
+    }
+}
+```
 
 ## 11.9 Set
 

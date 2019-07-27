@@ -3535,9 +3535,115 @@ public class StackTest {
 
 ## 11.9 Set
 
+- Set不保存重复的元素
+- Set具有与Collection完全一样的接口，因此没有任何额外的功能。同时因为其是一个抽象的接口：所以不能直接实例化一个set对象。*(`Set s = new Set()`)错误*
+- TreeSet将元素存储在红-黑树数据结构中，而HashSet使用的是散列函数。
+- 常见的方法:
+  - 向集合中添加元素: `add()`
+  - 去掉集合中所有的元素: `clear()`
+  - 最常见的操作是判断集合中是否包含某一个元素: `contains()`
+  - 判断集合是否为空: `isEmpty()`
+  - 主要用于递归集合，返回一个Iterator()对象: `iterator()`
+  - 从集合中去掉特定的对象: `remove()`
+  - 返回集合的大小: `size()`
+- HashSet（散列集）
+  - HashSet通过Hash算法排布集合内的元素，所谓的Hash算法就是把任意长度的输入（又叫做预映射），通过散列算法，变换成固定长度的输出，该输出就是散列值。这种转换是一种压缩映射。对于不同类型的信息，其散列值公式亦不完全相同。
+  - 当我们使用HashSet存储自定义类时，需要在自定义类中重写equals和hashCode方法，主要原因是集合内不允许有重复的数据元素，在集合校验元素的有效性时（数据元素不可重复），需要调用equals和hashCode验证。
+  - HashSet在判断数据元素是否重复时，有两个步骤，注意先后顺序
+    - 先检查hashCode值是否与集合中已有相同。
+    - 如果hashCode相同再调用equals方法进一步检查。（equals返回真表示重复）
+- TreeSet（树集）
+  - TreeSet是一个有序集合，其元素按照升序排列，默认是按照自然顺序排列，也就是说TreeSet中的对象元素需要实现Comparable接口来实现自比较功能。TreeSet类中跟HashSet类一样也没有get()方法来获取指定位置的元素，所以也只能通过迭代器方法来获取。
+  - TreeSet虽然是有序的，但是并没有具体的索引，当插入一个新的数据元素的时候，TreeSet中原有的数据元素可能需要重新排序，所以TreeSet插入和删除数据元素的效率较低。
+  - 当我们使用TreeSet存储自定义类时，需要在自定义类实现Comparable接口并重写其compareTo方法，以提供比对形式，否在TreeSet不能对用户自定义的类型进行正确的树状排序。
+
 ## 11.10 Map
 
+- Map接口中键和值一一映射. 可以通过键来获取值。给定一个键和一个值，你可以将该值存储在一个Map对象. 之后，你可以通过键来访问对应的值。
+- 常用的HashMap集合、LinkedHashMap集合。
+  - HashMap<K,V>：存储数据采用的哈希表结构，元素的存取顺序不能保证一致。由于要保证键的唯一、不重复，需要重写键的hashCode()方法、equals()方法。
+  - LinkedHashMap<K,V>：HashMap下有个子类LinkedHashMap，存储数据采用的哈希表结构+链表结构。通过链表结构可以保证元素的存取顺序一致；通过哈希表结构可以保证的键的唯一、不重复，需要重写键的hashCode()方法、equals()方法
+- Map接口中的常用方法
+  - `get(Object key)`: 返回指定键所映射的值；如果此映射不包含改键的映射关系，则返回null
+  - `put(K key, V value)`: 将指定的值与此映射中指定的键关联
+  - `remove(Object key)`: 如果存在一个键的映射关系，则将其从此映射中移除
+- Map集合遍历键找值方式
+  - 获取Map集合中所有的键，由于键是唯一的，所以返回一个Set集合存储所有的键
+  - 遍历键的Set集合，得到每一个键
+  - 根据键，获取键所对应的值
+
+```java
+public class MapDemo {
+    public static void main(String[] args) {
+        //创建Map对象
+        Map<String, String> map = new HashMap<String,String>();
+        //给map中添加元素
+        map.put("邓超", "孙俪");
+        map.put("李晨", "范冰冰");
+        map.put("刘德华", "柳岩");
+        //获取Map中的所有key
+        Set<String> keySet = map.keySet();
+        //遍历存放所有key的Set集合
+        Iterator<String> it =keySet.iterator();    **
+        while(it.hasNext()){                         //利用了Iterator迭代器**
+            //得到每一个key
+            String key = it.next();
+            //通过key获取对应的value
+            String value = map.get(key);
+            System.out.println(key+"="+value);
+        }
+    }
+}
+```
+
+- Map集合遍历键值对方式
+  - 获取Map集合中，所有的键值对(Entry)对象，以Set集合形式返回
+  - 遍历包含键值对(Entry)对象的Set集合，得到每一个键值对(Entry)对象
+  - 通过键值对(Entry)对象，获取Entry对象中的键与值。
+  
+```java
+public class MapDemo {
+    public static void main(String[] args) {
+        //创建Map对象
+        Map<String, String> map = new HashMap<String,String>();
+        //给map中添加元素
+        map.put("邓超", "孙俪");
+        map.put("李晨", "范冰冰");
+        map.put("刘德华", "柳岩");
+        //获取Map中的所有key与value的对应关系
+        Set<Map.Entry<String,String>> entrySet = map.entrySet();
+        //遍历Set集合
+        Iterator<Map.Entry<String,String>> it =entrySet.iterator();
+        while(it.hasNext()){
+            //得到每一对对应关系
+            Map.Entry<String,String> entry = it.next();
+            //通过每一对对应关系获取对应的key
+            String key = entry.getKey();
+            //通过每一对对应关系获取对应的value
+            String value = entry.getValue();
+            System.out.println(key+"="+value);
+        }
+    }
+}
+```
+
+- Map集合不能直接使用迭代器或者foreach进行遍历。但是转成Set之后就可以使用了。
+
 ## 11.11 Queue
+
+- 队列是一个典型的先进先出(FIFO)的容器
+- LinkedList提供了方法以支持队列的行为，并且它实现了Queue接口，因此Linkedlist可以用作Queue的一种实现。通过将Linkedlist向上转型为Queue。
+- Queue 方法介绍：
+  - `add(E)`, `offer(E)`在尾部添加
+    - 他们的共同之处是建议实现类禁止添加 null 元素，否则会报空指针 NullPointerException；
+    - 不同之处在于add()方法在添加失败（比如队列已满）时会报一些运行时错误错；而offer()方法即使在添加失败时也不会崩溃，只会返回false。
+  - `element()`, `peek()`获取但不删除
+    - 当队列为空时element()抛出异常；peek()不会崩溃，只会返回null。
+
+### 11.11.1 PriorityQueue
+
+- Integer、String和Character可以与PriorityQueue一起工作，因为这些类已经内建了自然排序。
+- 如果你想在PriorityQueue中使用自己的类，就必须包括额外的功能以产生自然排序，或者必须提供自己的Comparator。
 
 ## 11.12 Collection和Iterator
 

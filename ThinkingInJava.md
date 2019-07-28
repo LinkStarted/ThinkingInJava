@@ -3647,4 +3647,69 @@ public class MapDemo {
 
 ## 11.12 Collection和Iterator
 
-## 11.13 Foreach与迭代器
+- Collection是描述所有序列容器的共性的根接口
+- Collection接口常见方法:
+  - add( elemten:Object) :boolean 添加对象
+  - addAll(collection:Collection):boolean 批量添加对象
+  - clear():void 清除集合
+  - contains( elemten:object):boolean 集合是否包含某个对象
+  - equals(object:Object):boolean 比较此 collection 与指定对象是否相等。
+  - iterator(): Iterator 返回迭代器
+  - hashCode()；int 返回此 collection 的哈希码值。
+  - remove(elemten:Object): boolean 删除指定对象
+  - emoveAll(collection:Collection):boolean 移除此 collection 中那些也包含在指定 collection 中的所有元素
+  - retainAll(collection:Collection):boolean 仅保留此 collection 中那些也包含在指定 collection 的元素，即取交集
+  - toArray() : Object[] 返回包含此 collection 中所有元素的数组。
+  - toArray(array:Object[]) : Object[] 返回包含此 collection 中所有元素的数组；返回数组的运行时类型与指定数组的运行时类型相同
+
+- 在Collection接口中没有提供get()方法，如果要遍历Collection中对象，就必须使用Iterator。
+- Iterator常见方法:
+  - hashNext():boolean 判断是否存在另一个可访问元素
+  - next():object 返回要访问的下一个元素
+  - remove():void 删除上次访问返回的对象，此方法必须进跟在一个元素的访问后执行
+
+## 11.13 For/Foreach与迭代器
+
+- 三种方式的区别：
+  - 形式区别：
+    - `for（int i=0;i<arr.size();i++）{...}`
+    - `for（int　i：arr）{...}`
+    - `Iterator it = arr.iterator();  while(it.hasNext()){ object o =it.next(); ...}`
+  - 条件差别
+    - for需要知道数组或者集合的大小，而且需要时有序的，不然无法遍历；
+    - foreach和iterator不需要知道数组或者集合的大小，他们都是得到集合内的每一个元素然后进行处理；
+  - 多态差别
+    - for和foreach都需要知道自己的集合类型，甚至要知道自己集合内的元素类型，不能实现多态。
+    - Iterator是一个接口类型，它不关心集合的类型和集合内的元素类型，因为它是通过hasnext和next来进行下一个元素的判断和获取，这一切都是在集合类型定义的时候就完成的事情。迭代器统一了对容器的访问模式，这也是对接口解耦的最好表现。
+  - 用法差别
+    - for一般可以用于简单的顺序集合，并且可以预测集合的大小；
+    - foreach可以遍历任何集合或者数组，但是使用者需要知道遍历元素的类型。
+    - iterator是最强大的，它可以随之修改元素内部的元素。可以在遍历的时刻用remove(),但其他两个都不可以。
+
+# 第十二章 通过异常处理错误
+
+## 12.1 概念
+
+## 12.2 基本异常
+
+## 12.3 捕获异常
+
+## 12.4 创建自定义异常
+
+## 12.5 异常说明
+
+## 12.6 捕获所有异常
+
+## 12.7 Java标准异常
+
+## 12.8 使用finall进行清理
+
+## 12.9 异常的限制
+
+## 12.10 构造器
+
+## 12.11 异常匹配
+
+## 12.12 其他可选方式
+
+## 12.13 异常使用指南

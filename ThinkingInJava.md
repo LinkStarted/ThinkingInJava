@@ -3363,7 +3363,7 @@ public static void List_set() {
 
 - 查找元素  
   `get(int index)`,返回列表中指定位置的元素  
-  `subList(int fromIndex, int toIndex)`,返回列表中指定的fromIndex（包括）和toIndex（不包括）之间的部分元素。
+  `subList(int fromIndex, int toIndex)`,返回列表中指定的fromIndex(包括)和toIndex(不包括)之间的部分元素。
 
 ```java
 public static void List_get() {
@@ -3378,10 +3378,10 @@ public static void List_get() {
 
 - 获得集合内元素个数:`list.size();`
 - 清空集合：`list.clear();`
-- 判断集合中是否存在某个元素（存在返回true，不存在返回false）：`list.contains(e);`
+- 判断集合中是否存在某个元素(存在返回true，不存在返回false)：`list.contains(e);`
 - 元素存在则返回找到的第一个元素的下标，不存在则返回-1：`list.indexOf(e);`
 - 元素存在则返回找到的最后一个元素的下标，不存在则返回-1：`list.lastIndexOf(e);`
-- 判断集合是否为空（空则返回true，非空则返回false）：`list.isEmpty();`
+- 判断集合是否为空(空则返回true，非空则返回false)：`list.isEmpty();`
 - 将集合转换为数组：`list.toArray();`
 
 ## 11.6 迭代器
@@ -3546,13 +3546,13 @@ public class StackTest {
   - 主要用于递归集合，返回一个Iterator()对象: `iterator()`
   - 从集合中去掉特定的对象: `remove()`
   - 返回集合的大小: `size()`
-- HashSet（散列集）
-  - HashSet通过Hash算法排布集合内的元素，所谓的Hash算法就是把任意长度的输入（又叫做预映射），通过散列算法，变换成固定长度的输出，该输出就是散列值。这种转换是一种压缩映射。对于不同类型的信息，其散列值公式亦不完全相同。
-  - 当我们使用HashSet存储自定义类时，需要在自定义类中重写equals和hashCode方法，主要原因是集合内不允许有重复的数据元素，在集合校验元素的有效性时（数据元素不可重复），需要调用equals和hashCode验证。
+- HashSet(散列集)
+  - HashSet通过Hash算法排布集合内的元素，所谓的Hash算法就是把任意长度的输入(又叫做预映射)，通过散列算法，变换成固定长度的输出，该输出就是散列值。这种转换是一种压缩映射。对于不同类型的信息，其散列值公式亦不完全相同。
+  - 当我们使用HashSet存储自定义类时，需要在自定义类中重写equals和hashCode方法，主要原因是集合内不允许有重复的数据元素，在集合校验元素的有效性时(数据元素不可重复)，需要调用equals和hashCode验证。
   - HashSet在判断数据元素是否重复时，有两个步骤，注意先后顺序
     - 先检查hashCode值是否与集合中已有相同。
-    - 如果hashCode相同再调用equals方法进一步检查。（equals返回真表示重复）
-- TreeSet（树集）
+    - 如果hashCode相同再调用equals方法进一步检查。(equals返回真表示重复)
+- TreeSet(树集)
   - TreeSet是一个有序集合，其元素按照升序排列，默认是按照自然顺序排列，也就是说TreeSet中的对象元素需要实现Comparable接口来实现自比较功能。TreeSet类中跟HashSet类一样也没有get()方法来获取指定位置的元素，所以也只能通过迭代器方法来获取。
   - TreeSet虽然是有序的，但是并没有具体的索引，当插入一个新的数据元素的时候，TreeSet中原有的数据元素可能需要重新排序，所以TreeSet插入和删除数据元素的效率较低。
   - 当我们使用TreeSet存储自定义类时，需要在自定义类实现Comparable接口并重写其compareTo方法，以提供比对形式，否在TreeSet不能对用户自定义的类型进行正确的树状排序。
@@ -3636,7 +3636,7 @@ public class MapDemo {
 - Queue 方法介绍：
   - `add(E)`, `offer(E)`在尾部添加
     - 他们的共同之处是建议实现类禁止添加 null 元素，否则会报空指针 NullPointerException；
-    - 不同之处在于add()方法在添加失败（比如队列已满）时会报一些运行时错误错；而offer()方法即使在添加失败时也不会崩溃，只会返回false。
+    - 不同之处在于add()方法在添加失败(比如队列已满)时会报一些运行时错误错；而offer()方法即使在添加失败时也不会崩溃，只会返回false。
   - `element()`, `peek()`获取但不删除
     - 当队列为空时element()抛出异常；peek()不会崩溃，只会返回null。
 
@@ -3672,8 +3672,8 @@ public class MapDemo {
 
 - 三种方式的区别：
   - 形式区别：
-    - `for（int i=0;i<arr.size();i++）{...}`
-    - `for（int　i：arr）{...}`
+    - `for(int i=0;i<arr.size();i++){...}`
+    - `for(int　i：arr){...}`
     - `Iterator it = arr.iterator();  while(it.hasNext()){ object o =it.next(); ...}`
   - 条件差别
     - for需要知道数组或者集合的大小，而且需要时有序的，不然无法遍历；
@@ -3690,19 +3690,240 @@ public class MapDemo {
 
 ## 12.1 概念
 
+- 在 Java 中一个异常的产生，主要有如下三种原因：
+  - Java 内部错误发生异常，Java 虚拟机产生的异常
+  - 编写的程序代码中的错误所产生的异常，例如空指针异常、数组越界异常等。这种异常称为未检査的异常，一般需要在某些类中集中处理这些异常。
+  - 通过 throw 语句手动生成的异常，这种异常称为检査的异常，一般用来告知该方法的调用者一些必要的信息。
+
 ## 12.2 基本异常
+
+- 异常情形(exceptional condition)是指阻止当前方法或作用域继续执行的问题。
+- 当抛出异常后，有几件事会随之发生。
+  - 首先，同Java中其他对象的创建一样，将使用new在堆上创建异常对象。
+  - 然后，当前的执行路径(它不能继续下去了)被终止，并且从当前环境中弹出对异常对象的引用。
+  - 此时，异常处理机制接管程序，并开始寻找一个恰当的地方来继续执行程序。这个恰当的地方就是异常处理程序，它的任务是将程序从错误状态中恢复，以使程序能要么换一种方式运行，要么继续运行下去。
+
+### 12.2.1 异常参数
+
+- 用new在堆上创建异常对象，这也伴随着存储空间的分配和构造器的调用。所有标准异常类都有两个构造器：一个是默认构造器；另一个是接受字符串作为参数，以便能把相关信息放入异常对象的构造器：`throw new nullPointerException("t = null");`
+- 能够抛出任意类型的Tbrowable对象，它是异常类型的根类。
 
 ## 12.3 捕获异常
 
+### 12.3.1 try块
+
+- 这个块里“尝试”各种(可能产生异常的)方法调用，所以称为町块。它是跟在tη关键字之后的普通程序块：
+`try{ //Code that might generate exceptions }`
+
+## 12.3.2 异常处理程序
+
+- 针对每个要捕获的异常，得准备相应的处理程序。异常处理程序紧跟在町块之后，以关键字catch表示：
+
+```java
+try{
+    //Code that might generate exceptions
+}catch(Type1 id1){
+    //Handle exceptions of Type1
+}catch(Type2 id2){
+     //Handle exceptions of Type2
+}
+```
+
+###12.3.3 终止与恢复
+
+- 异常处理理论上有两种基本模型。
+  - Java支持终止模型，在这种模型中，将假设错误非常关键，以至于程序无法返回到异常发生的地方继续执行。一旦异常被抛出，就表明错误已无法挽回，也不能回来继续执行。
+  - 另一种称为恢复模型。意思是异常处理程序的工作是修正错误，然后重新尝试调用出问题的方法，并认为第二次能成功。
+
 ## 12.4 创建自定义异常
+
+- 建立新的异常类型最简单的方法就是让编译器为你产生默认构造器。
+
+```java
+class MyException extends Exception{
+    public MyException() {}
+    public MyException(String msg) { super(msg); }
+}
+public class FullConstructors {
+    public static void f() throws MyException{
+        System.out.println("Throwing MyException from f()");
+        throw new MyException();
+    }
+    public static void g() throws MyException{
+        System.out.println("Throwing MyException from g()");
+        throw new MyException("Originated in g()");
+    }
+    public static void main(String[] args) {
+        try {
+            f();
+        }catch(MyException e) {
+            e.printStackTrace(System.out);
+        }
+        try {
+            g();
+        }catch(MyException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+}
+/*Output:
+Throwing MyException from f()
+MyException
+    at FullConstructors.f(FullConstructors.java:8)
+    at FullConstructors.main(FullConstructors.java:16)
+Throwing MyException from g()
+MyException: Originated in g()
+    at FullConstructors.g(FullConstructors.java:12)
+    at FullConstructors.main(FullConstructors.java:21)
+*/
+```
+
+- 两个构造器定义了MyException类型对象的创建方式。对于第二个构造器，使用super关键字明确调用了其基类构造器，它接受一个字符串作为参数。
+- 在异常处理程序中，调用了在Throwable类声明(Exception 即从此类继承)的prlntStackTrace()方法。就像从输出中看到的，它将打印“从方法调用处直到异常抛出处”的方法调用序列。这里，信息被发送到了System.out，并自动地被捕获和显示在输出中。但是，如果调用默认版本：`e.printStackTrace()`,则信息将被输出到标准错误流。
+
+### 12.4.1 异常与记录日志
+
+- 使用java.util.logging工具将输出记录到日志中
+
+```java
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Logger;
+
+class LoggingException extends Exception {
+  private static Logger logger = Logger.getLogger("LoggingException");
+  public LoggingException() {
+    StringWriter trace = new StringWriter();
+    //printStackTrace(PrintWriter)将此Throwable及其追踪输出到指定的PrintWriter
+    printStackTrace(new PrintWriter(trace));
+    logger.severe(trace.toString());
+    //logger.info(trace.toString());
+  }
+}
+public class LoggingExceptions  {
+  public static void main(String[] args) {
+    try {
+      throw new LoggingException();
+    } catch(LoggingException e) {
+      System.err.println("Caught " + e);
+    }
+    try {
+      throw new LoggingException();
+    } catch(LoggingException e) {
+      System.err.println("Caught " + e);
+    }
+  }
+}
+/*Output:
+八月 05, 2019 10:47:18 下午 LoggingException <init>
+严重: LoggingException
+    at LoggingExceptions.main(LoggingExceptions.java:20)
+
+Caught LoggingException
+八月 05, 2019 10:47:18 下午 LoggingException <init>
+严重: LoggingException
+    at LoggingExceptions.main(LoggingExceptions.java:25)
+
+Caught LoggingException
+*/
+```
 
 ## 12.5 异常说明
 
+- 异常说明使用了附加的关键字throws ，后面接一个所有潜在异常类型的列表，所以方法定义可能看起来像这样：`void f() throws TooBig, TooSmall{}`
+- 代码必须与异常说明保持一致。如果方法里的代码产生了异常却没有进行处理，编译器会发现这个问题并提醒你：要么处理这个异常，要么就在异常说明中表明此方故将产生异常。通过这种自顶向下强制执行的异常说明机制， Java在编译时就可以保证一定水平的异常正确性。
+
 ## 12.6 捕获所有异常
+
+- 可以只写一个异常处理程序来捕获所有类型的异常。通过捕获异常类型的基类Exception,就可以做到这一点。
+- 这将捕获所有异常，所以最好把它放在处理程序列表的末尾，以防它抢在其他处理程序之前先把异常捕获了。
+- 对于异常来说， getClass()也许是个很好用的方法， 它将返回一个表示此对象类型的对象。然后可以使用getName()方法查询这个Class对象包含包信息的名称，或者使用只产生类名称的getSimpleName()方法。
+
+```java
+public class ExceptionMethods {
+  public static void main(String[] args) {
+    try {
+        throw new Exception("My Exception");
+    }catch(Exception e) {
+        System.out.println("Caught Exception");
+        System.out.println("getMessage(): " + e.getMessage());
+        System.out.println("getLocalizedMessage(): " + e.getLocalizedMessage());
+        System.out.println("toString(): " + e);
+        System.out.println("printStackTrace(): ");
+        e.printStackTrace(System.out);
+    }
+  }
+}
+/*Output:
+Caught Exception
+getMessage(): My Exception
+getLocalizedMessage(): My Exception
+toString(): java.lang.Exception: My Exception
+printStackTrace():
+java.lang.Exception: My Exception
+    at ExceptionMethods.main(ExceptionMethods.java:6)
+*/
+```
+
+- 可以发现每个方法都比前一个提供了更多的信息一一实际上它们每一个都是前一个的超集。
+
+### 12.6.1 栈轨迹
+
+- printStackTrace()方法所提供的信息可以通过printStackTrace()方法来直接访问，这个方法将－返回一个由校轨迹中的元素所构成的数组，其中每一个元素都表示棋中的一锁。元素0是栈顶元素，并且是调用序列中的最后一个方法调用。
+
+```java
+public class Test0805 {
+    static void f() {
+        try {
+            throw new Exception();
+        }catch(Exception e) {
+            for(StackTraceElement ste : e.getStackTrace()) {
+                System.out.println(ste.getMethodName());
+            }
+        }
+    }
+    static void g() { f(); }
+    static void h() { f(); }
+    public static void main(String[] args) {
+        f();
+        System.out.println("--------------------------------");
+        g();
+        System.out.println("--------------------------------");
+        h();
+        System.out.println("--------------------------------");
+    }
+}
+/*Output:
+f
+main
+--------------------------------
+f
+g
+main
+--------------------------------
+f
+h
+main
+--------------------------------
+*/
+```
+
+### 12.6.2 重新抛出异常
+
+- 重抛异常会把异常抛给上一级环境中的异常处理程序，同一个try块的后续catch子句将被忽略。
+- 如果只是把当前异常对象重新抛出，那么printStackTrace()方法显示的将是原来异常抛出点的词用核信息，而并非重新抛出点的信息。要想更新这个信息，可以调用filllnStack’lraceO方法，这将返回一个Throwable对象， 它是通过把当前调用核信息填入原来那个异常对象而建立的。
+- 调用filllnStackTraceO的那一行就成了异常的新发生地了。
+
+### 12.6.3 异常链
+
+- 常常会想要在捕获一个异常后抛出另一个异常，并且希望把原始异常的信息保存下来，这被称为异常链
+- 现在所有Throwable的子类在构造器中都可以接受一个cause（因由）对象作为参数。这个cause就用来表示原始异常，这样通过把原始异常传递给新的异常，使得即使在当前位置创建并抛出了新的异常，也能通过这个异常链追踪到异常最初发生的位置。
+- 在Throwable的子类中，只有三种基本的异常类提供了将cause参数的构造器。它们是Error（用于Java虚拟机报告系统错误）、Exception以及RuntimeException
+- 如果要把其他类型的异常链接起来，应该使用initCause()方法而不是构造器。
 
 ## 12.7 Java标准异常
 
-## 12.8 使用finall进行清理
+## 12.8 使用finally进行清理
 
 ## 12.9 异常的限制
 

@@ -3917,20 +3917,250 @@ main
 ### 12.6.3 异常链
 
 - 常常会想要在捕获一个异常后抛出另一个异常，并且希望把原始异常的信息保存下来，这被称为异常链
-- 现在所有Throwable的子类在构造器中都可以接受一个cause（因由）对象作为参数。这个cause就用来表示原始异常，这样通过把原始异常传递给新的异常，使得即使在当前位置创建并抛出了新的异常，也能通过这个异常链追踪到异常最初发生的位置。
-- 在Throwable的子类中，只有三种基本的异常类提供了将cause参数的构造器。它们是Error（用于Java虚拟机报告系统错误）、Exception以及RuntimeException
+- 现在所有Throwable的子类在构造器中都可以接受一个cause(因由)对象作为参数。这个cause就用来表示原始异常，这样通过把原始异常传递给新的异常，使得即使在当前位置创建并抛出了新的异常，也能通过这个异常链追踪到异常最初发生的位置。
+- 在Throwable的子类中，只有三种基本的异常类提供了将cause参数的构造器。它们是Error(用于Java虚拟机报告系统错误)、Exception以及RuntimeException
 - 如果要把其他类型的异常链接起来，应该使用initCause()方法而不是构造器。
 
 ## 12.7 Java标准异常
 
+- Throwable这个Java类被用来表示任何可以作为异常被抛出的类；
+- Throwable对象可分为两种类型(指从Throwable继承而得到的类型):
+  - Error用来表示编译时和系统错误(除特殊情况外，一般不用你关心) ,
+  - Exception是可以被抛出的基本类型，在Java类库、用户方法以及运行时故障中都可能抛出Exception型异常。所以Java程序员关心的基类型通常是Exception。
+
+### 12.7.1 RuntimeException
+
+- 属于运行时异常的类型有很多，它们会自动被Java虚拟机抛出，所以不必在异常说明中把它们列出来。这些异常都是从RuntimeException类继承而来。
+- 常见RuntimeException
+  - java.lang.NullPointerException 空指针异常；出现原因：调用了未经初始化的对象或者是不存在的对象。
+  - java.lang.ClassNotFoundException 指定的类找不到；出现原因：类的名称和路径加载错误；通常都是程序试图通过字符串来加载某个类时可能引发异常。
+  - java.lang.NumberFormatException 字符串转换为数字异常；出现原因：字符型数据中包含非数字型字符
+  - java.lang.IndexOutOfBoundsException 数组角标越界异常，常见于操作数组对象时发生。
+  - java.lang.IllegalArgumentException 方法传递参数错误。
+  - java.lang.ClassCastException 数据类型转换异常
+
 ## 12.8 使用finally进行清理
+
+- 对于一些代码，可能会希望无论try块中的异常是否抛出，它们都能得到执行，可以在异常处理程序后面加上finally子句。
+
+```java
+try{
+    //the guarded region: Dangerous activities
+}catch(A a1){
+    //Handler for situation A
+}catch(B b1){
+    //Handler for situation B
+}finally{
+    //Activities that happen every time
+}
+```
+
+- 无论异常是否被抛出，finally子句总能被执行。
+
+### 12.8.1 finally用来做什么
+
+- finally非常重要。它能使程序员保证：无论try块里发生了什么，内存总能得到释放。
+- 当涉及break和continue语句的时候，finally子句也会得到执行。
+- finally总是在控制转移语句(break，continue，return等)执行之前执行。
+
+### 12.8.2 在return中使用finally
+
+- finally中修改了值后，会不会影响return的值？
+
+```java
+   public static int returnValue2() {
+        int i = 1;
+        try{
+            return i;
+        } finally {
+            System.out.println("执行finally");
+            i = 2;
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println(returnValue2());
+    }
+/*OutPut
+执行finally
+
+1
+*/
+```
+
+- 如果finally中也return值，那么以哪个return值为准？
+  
+```java
+   public static int returnValue() {
+        try{
+            return 1;
+        } finally {
+            return 2;
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println(returnValue());
+    }
+
+/*OutPut
+2
+*/
+```
+
+- 结论：
+  - 不管有没有return值，finally块中代码都会执行；
+  - return值不会因为finally里面的修改而改变，
+  - 如果finally中也return值，以finally中的return值为准
+
+### 12.8.3 缺憾：异常丢失
+
+```java
+class VeryImportantException extends Exception{
+    public String toString() {
+        return "A very important exception!";
+    }
+}
+
+class HoHumException extends Exception {
+    public String toString() {
+        return "A trivial exception";
+    }
+}
+
+public class LostMessage {
+        void f() throws VeryImportantException {
+            throw new VeryImportantException();
+        }
+        void dispose() throws HoHumException {
+            throw new HoHumException();
+        }
+        public static void main(String[] args) {
+            try {
+                LostMessage lm = new LostMessage();
+                try {
+                    lm.f();
+                } finally {
+                    lm.dispose();
+                }
+            } catch(Exception e) {
+                System.out.println(e);
+            }
+        }
+}
+/*
+A trival exception
+*/
+```
+
+- 输出中可以看到，VeryImportantException不见了，被finally子句里的HoHumException取代。
+
+```java
+public class ExceptionSilencer {
+
+    @SuppressWarnings("finally")
+    public static void main(String[] args) {
+        try {
+            throw new RuntimeException();
+        } finally {
+            return;
+        }
+    }
+
+}
+```
+
+- 如果运行这个程序，就会看到及时抛出了异常，也不会产生任何输出
+- finally对于保证程序的正确性有很大的用处，但是使用过程中要注意避免以下两种会导致异常丢失的情况
+  - 在finally子句中抛出异常；
+  - 在finally子句中返回(return)。
 
 ## 12.9 异常的限制
 
+- 在覆盖方法的时候,只能抛出在基类方法的异常说明里列出的那些异常
+- 在基类构造器声明的异常,在子类必须抛出,子类的构造器可以抛出任何异常,但是必须抛出基类构造器的异常
+- 在基类和接口方法声明的异常,子类覆盖的方法可以不抛出基类和接口方法声明的异常以外的异常,但可以少或不抛出
+- 不能基于异常重载方法
+- 子类没有向上转型为基类和接口时,可以不捕获基类和接口的异常,反之.如有向上转型,必须捕获基类和接口的异常
+
 ## 12.10 构造器
+
+- 对于在构造阶段可能会抛出异常，并且要求清理的类，最安全的使用方式是使用嵌套的try子句
+- 这种通用的清理惯用站在构造器不抛出任何异常时也应该运用，其基本规则是：在创建需要清理的对象之后，立即进入一个try-finally语句块：
 
 ## 12.11 异常匹配
 
+- 抛出异常的时候，异常处理系统会按照代码的书写顺序找出“最近”的处理程序。找到匹配的处理程序之后，它就认为异常将得到处理，然后就不再继续查找。
+- 查找的时候并不要求抛出的异常同处理程序所声明的异常完全匹配
+
+```java
+class Annoyance extends Exception {}
+class Sneeze extends Annoyance {}
+
+public class Human {
+  public static void main(String[] args) {
+    // Catch the exact type:
+    try {
+      throw new Sneeze();
+    } catch(Sneeze s) {
+      System.out.println("Caught Sneeze");
+    } catch(Annoyance a) {
+      System.out.println("Caught Annoyance");
+    }
+    // Catch the base type:
+    try {
+      throw new Sneeze();
+    } catch(Annoyance a) {
+      System.out.println("Caught Annoyance");
+    }
+  }
+} /* Output:
+Caught Sneeze
+Caught Annoyance
+*///:~
+```
+
+- 换句话说,捕获基类的异常,就可以匹配所有派生类的异常
+
+```java
+ try {
+      throw new Sneeze();
+    } catch(Annoyance a) {
+    } catch(Sneeze s) { //这句编译器会报错,异常已由前面catch子句处理
+    }
+```
+
 ## 12.12 其他可选方式
 
+- 异常处理的一个重要原则是“只有你在知道如何处理的情况下才能捕获异常”
+- 异常处理的一个重要目标就是把错误处理的代码同错误发生的地点相分离。
+- 被检查的异常。它强迫你在可能还没有准备好处理错误的时候被迫加上了catch这就导致了吞食有害的问题
+
 ## 12.13 异常使用指南
+
+- 应该在下列情况下使用异常:
+  - 在恰当的级别处理问题。(在知道该如何处理的情况下才捕获异常。)
+  - 解决问题并且重新调用产生异常的方法。
+  - 进行少许修补， 然后绕过异常发生的地方继续执行。
+  - 用别的数据进行计算，以代替方法预计会返回的值。
+  - 把当前运行环境下能做的事情尽量做完，然后把相同的异常重抛到更高层。
+  - 把当前运行环境下能做的事情尽量做完，然后把不同的异常抛到更高层。
+  - 终止程序。
+  - 进行简化。(如果你的异常模式使问题变得太复杂，那用起来会非常痛苦也很烦人。)
+  - 让类库和程序更安全。(这既是在为调试做短期投资，也是在为程序的健壮性做长期投资。)
+
+# 第十三章 字符串
+
+## 13.1 不可变String
+
+## 13.2 重载“+”与StringBuilder
+
+## 13.3 无意识递归
+
+## 13.4 String上的操作
+
+## 13.5 格式化输出
+
+## 13.6 正则表达式
+
+## 13.7 扫描输入
+
+## 13.8 StringTokenizer

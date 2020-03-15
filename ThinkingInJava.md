@@ -4151,11 +4151,54 @@ Caught Annoyance
 
 ## 13.1 不可变String
 
+- String类中每一个看起来会修改String值的方法，实际上都是创建了一个全新的String对象，以包含修改后的字符串内容。而最初的String对象则丝毫未动。
+
 ## 13.2 重载“+”与StringBuilder
+
+- 用于String的"+"与"+="是Java中仅有的两个重载过的操作符，而Java并不允许程序员重载任何操作符。
+- ，当你为一个类编写toString()方法时，如果字符串操作比较简单，那就可以信赖编译器，它会为你合理地构造最终的字符串结果。但是，如果你要在toString()方法中使用循环，那么最好自己创建一个StringBuilder对象，用它来构造最终的结果。
+- StringBuilder提供了丰富而全面的方法，包括insert()、repleace() 、substring()甚至reverse(),但是最常用的还是append()和toString(),还有delete()方法。
+- Strin gBuilder是Java SES 引入的，在这之前Java用的是StringBuffer . 后者是结程安全的，因此开销也会大些， 所以在JavaSE5/6中，字符串操作应该还会更快一点。
 
 ## 13.3 无意识递归
 
+```java
+public class InfiniteRecursion{
+    public String toString(){
+        return "InfiniteRecursion address " + this;
+    }
+}
+```
+
+- 编译器看到一个string对象后面跟着一个“+”，而后面的对象不是string，于是编译器试着将this转换成一个string，通过调用this上的toString（）方法，于是就发生了递归调用。
+
 ## 13.4 String上的操作
+
+- 以下是String对象具备的一些基本方法
+
+| 方法 | 参数，重载版本 | 应用 |
+| --- | --- | --- | --- |
+| 构造器 | 重载版本： 默认版本,String, StringBuilder, StringBuffer,char数组,byte数组 | 创建String对象 |
+| length() | | Stirng中字符的个数 |
+| chatAt() | Int索引 | 取得String中该索引位置上的char |
+| getChars(), getBytes() | 要复制部分的起点和终点的索引，复制的目标数组，目标数组的起始索引 | 复制char获byte到一个目标数组中 |
+| toCharArray() | | 生成一个char[],包含String的所有字符 |
+| equals(), equalsIgnoreCase() | 与之进行比较的String | 比较两个String的内容是否相同 |
+| compareTo() | 与之进行比较的String | 按词典顺序比较String的内容，比较结果为负数、零或正数。注意，大小写并不等价 |
+| contains() | 要搜索的CharSequence | 如果该String对象包含参数的内容，则返回true |
+| contentEquals() | 与之进行比较的CharSequence或StringBuffer | 如果该String与参数的内容完全一数，则返回true |
+| equalslgnoreCase() | 与之进行比较的String | 忽略大小写，如果两个String的内容相同，则返回true |
+| regionMatcher() | 该String的索引偏移量，另一个String及其索引偏移量，要比较的长度。重载版本增加了忽略大小写的功能 | 返回boolean结果，以表明比较区域是否相等 |
+| startsWith() | 可能的起始String。重载版本在参数中增加了偏移量 | 返回boolean结果，以表明该String是否以此参数起始 |
+| endsWith() | 该String可能的后缀String | 返回boolean结果，以表明该String是否以此参数后缀 |
+| indexOf(), lastlndexOf() | 重载版本包括：char,char与起始索引，String,String与起始索引 | 如占在该String并不包含此参数，就返回-1 ，否则返回此参数在String中的起始索引。lastlndexOfO(是从后向前搜索 |
+| substring() (subSequence()) | 重载版本：起始索引；起始索引+终点坐标 | 返回一个新的String，以包含参数指定的子字符串 |
+| concat() | 要连接的String | 返回一个新的String对象，内容为原始String链接上参数String |
+| replace() | 要替换掉的字符，用来进行替换的新字符。也可以用一个CharSequence来替换另一个CharSequence | 返回替换字符后的新String对象。如果没有发生替换，则返回原始的String对象 |
+| toLowerCase(), toUpperCase() | | 将字符的大小改变后，返回一个新String对象。如果没有发生，则返回原始String对象 |
+| trim() | | 将String两端的空白字符删除后，返回一个新的String对象。如果没有发生，则返回原始String对象 |
+| valueOf() | 重载版本： Object，char[], char[],偏移量，与字符个数, boolean, char,int,long, float, double | 返回一个表示参数内容的String
+| intern() | | 为每个唯一的字符序列生成一个且仅生成一个String引用| 
 
 ## 13.5 格式化输出
 
